@@ -14,7 +14,7 @@ import 'package:video_encryption/components/settings_animatedtext.dart';
 import 'package:video_encryption/constants/constants.dart';
 import 'package:video_encryption/constants/myfonts.dart';
 import 'package:video_encryption/controllers/filepath_controller.dart';
-import 'package:video_encryption/ffmpeg/video_compressor.dart';
+import 'package:video_encryption/controllers/ffmpeg/video_compressor.dart';
 import 'package:video_encryption/files/files.dart';
 import 'package:video_encryption/pages/titlebar/title_bar.dart';
 import 'package:video_encryption/routes/routes.dart';
