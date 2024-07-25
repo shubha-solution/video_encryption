@@ -12,6 +12,7 @@ import 'package:video_encryption/components/colorpage.dart';
 import 'package:video_encryption/controllers/filepath_controller.dart';
 import 'package:video_encryption/controllers/tray_controller.dart';
 import 'package:video_encryption/routes/routes.dart';
+
 import 'package:window_manager/window_manager.dart';
 
 Future<void> main() async {
@@ -118,10 +119,11 @@ class MyTrayListener extends TrayListener {
   }
 
   void _toggleAutoShutdown() {
+    
     final FilePath getfilePath = Get.put(FilePath());
     getfilePath.shutdown.value = !getfilePath.shutdown.value;
 
-    TrayManager.instance.setContextMenu(Menu(
+     TrayManager.instance.setContextMenu(Menu(
       items: [
         MenuItem(key: 'show_window', label: 'Show Window'),
         MenuItem(key: 'hide_window', label: 'Hide Window'),
@@ -134,5 +136,6 @@ class MyTrayListener extends TrayListener {
         MenuItem(key: 'quit', label: 'Quit'),
       ],
     ));
+    
   }
 }

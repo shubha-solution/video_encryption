@@ -1,6 +1,6 @@
 import 'package:get/get_navigation/src/routes/get_route.dart';
 import 'package:get/get_navigation/src/routes/transitions_type.dart';
-import 'package:video_encryption/files/files.dart';
+import 'package:video_encryption/controllers/files/files.dart';
 import 'package:video_encryption/pages/loginsignup.dart';
 import 'package:video_encryption/pages/settingspage.dart';
 
