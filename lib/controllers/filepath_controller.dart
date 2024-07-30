@@ -12,5 +12,6 @@ class FilePath extends GetxController {
 
   // Progress Page
   RxList tobecompressedvideospath = [].obs ;
+  RxString currentCompressingVide = "".obs;
 
 }

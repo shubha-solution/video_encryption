@@ -108,6 +108,7 @@ class _SettingsPageState extends State<SettingsPage> {
     });
   }
 
+
   // Controllers
   TextEditingController devicename = TextEditingController();
   TextEditingController originalfile = TextEditingController();
@@ -210,6 +211,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                         ],
                                       ),
                                       MyTextField(
+                                        isenable: true,
                                         width: width,
                                         controller: devicename,
                                         errorText: 'Please enter device name',
@@ -221,6 +223,9 @@ class _SettingsPageState extends State<SettingsPage> {
                                         height: 20,
                                       ),
                                       MyTextField(
+
+
+                                        isenable: true,
                                         width: width,
                                         controller: originalfile,
                                         errorText:
@@ -240,7 +245,30 @@ class _SettingsPageState extends State<SettingsPage> {
                                       const SizedBox(
                                         height: 20,
                                       ),
+                                       MyTextField(
+                                        isenable: true,
+                                        width: width,
+                                        controller: originalfile,
+                                        errorText:
+                                            'Please select completed video path',
+                                        heading: 'Completed video path',
+                                        hintText: "Select File Location",
+                                        onTap: () async {
+                                          String? selectedDirectory =
+                                              await FileSelector
+                                                  .selectDirectory();
+                                          if (selectedDirectory != null) {
+                                            originalfile.text =
+                                                selectedDirectory;
+                                          }
+                                        },
+                                      ),
+                                      const SizedBox(
+                                        height: 20,
+                                      ),
                                       MyTextField(
+                                        isenable: true,
+
                                         width: width,
                                         controller: encryptedfile,
                                         errorText:

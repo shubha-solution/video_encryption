@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:path/path.dart';
 import 'package:video_encryption/components/colorpage.dart';
 import 'package:video_encryption/components/completed_list.dart';
 import 'package:video_encryption/components/failed_list.dart';
@@ -18,57 +19,44 @@ class ProgressPage extends StatefulWidget {
 }
 
 class _ProgressPageState extends State<ProgressPage> {
-
-
-  // animated text Content
   List<String> animatedText = [
     'Protect your videos ensure complete security.',
     'Keep your videos safe maintain privacy and security.',
     'Secure your content safeguard your data.'
   ];
 
-  // Pages content
   List<Widget> pages = [
     const Completed(),
     const Failed(),
     const Others(),
   ];
 
-  // which Row is Selected
-  Set<int> selectedRows = {}; // Set to keep track of selected row indices
-
-  // Navigation button true = progress and false = history
   RxBool isinProgress = true.obs;
-
-  // history page navigation rail selected index
   int _selectedIndex = 0;
-
-   // history page navigation rail type
   NavigationRailLabelType labelType = NavigationRailLabelType.all;
-
-  // navigation rail style
   bool showLeading = false;
   bool showTrailing = false;
   double groupAlignment = -1.0;
 
-  // Controllers
   FilePath c = Get.put(FilePath());
   RunCommand p = Get.put(RunCommand());
 
-  // style
-  TextStyle headingstyle = FontFamily.font6.copyWith(fontSize: 16,fontWeight: FontWeight.w600,color: ColorPage.darkblue.withOpacity(0.7));
-      TextStyle buttonTextStyle =         TextStyle(
-                            fontFamily: MyFonts.heading,
-                            fontSize: MyFonts.headingsize,
-                            color: ColorPage.darkblue,
-                          );
-                    TextStyle headingNumber =           TextStyle(
-                                  fontFamily: MyFonts.heading,
-                                  fontSize: MyFonts.headingsize,
-                                  color: ColorPage.darkblue.withOpacity(0.3),
-                                );
-
-                                TextStyle rowTextStyle =     FontFamily.font3.copyWith(color: const Color.fromARGB(255, 130, 130, 130));
+  TextStyle headingstyle = FontFamily.font6.copyWith(
+      fontSize: 16,
+      fontWeight: FontWeight.w600,
+      color: ColorPage.darkblue.withOpacity(0.7));
+  TextStyle buttonTextStyle = TextStyle(
+    fontFamily: MyFonts.heading,
+    fontSize: MyFonts.headingsize,
+    color: ColorPage.darkblue,
+  );
+  TextStyle headingNumber = TextStyle(
+    fontFamily: MyFonts.heading,
+    fontSize: MyFonts.headingsize,
+    color: ColorPage.darkblue.withOpacity(0.3),
+  );
+  TextStyle rowTextStyle = FontFamily.font3
+      .copyWith(color: const Color.fromARGB(255, 130, 130, 130));
 
   @override
   Widget build(BuildContext context) {
@@ -106,10 +94,7 @@ class _ProgressPageState extends State<ProgressPage> {
                         const SizedBox(
                           width: 5,
                         ),
-                        Text(
-                          'Progress',
-                          style: buttonTextStyle
-                        ),
+                        Text('Progress', style: buttonTextStyle),
                         const SizedBox(
                           width: 5,
                         ),
@@ -248,10 +233,12 @@ class _ProgressPageState extends State<ProgressPage> {
                         ? Column(
                             children: [
                               Container(
-                                margin: const EdgeInsets.symmetric(horizontal: 2),
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 2),
                                 decoration: const BoxDecoration(
                                   color: Colors.white,
-                                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(8)),
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black12,
@@ -342,16 +329,21 @@ class _ProgressPageState extends State<ProgressPage> {
                                 child: ListView.builder(
                                   itemCount: c.tobecompressedvideospath.length,
                                   itemBuilder: (context, index) {
+                                    bool isCompressing = index == 0; // Change this logic based on your actual condition
+                                    bool isCompleted = true; // Set this to true when the video is compressed
                                     return InkWell(
                                       onTap: () {},
                                       child: Stack(
                                         alignment: Alignment.center,
                                         children: [
-                                          index == 0
+                                          isCompressing
                                               ? Obx(
                                                   () => LinearProgressIndicator(
-                                                    backgroundColor: Colors.white,
-                                                    borderRadius: BorderRadius.circular(8),
+                                                    backgroundColor:
+                                                        Colors.transparent,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
                                                     minHeight: 50,
                                                     color: Colors.blue[300],
                                                     value: p.progress.value,
@@ -361,10 +353,11 @@ class _ProgressPageState extends State<ProgressPage> {
                                           Container(
                                             margin: const EdgeInsets.all(8),
                                             decoration: BoxDecoration(
-                                              color: index == 0
-                                                  ? Colors.transparent
-                                                  : Colors.green[100],
-                                              borderRadius: const BorderRadius.all(
+                                              // color: isCompleted
+                                              //     ? Colors.green[100]
+                                              //     : Colors.white,
+                                              borderRadius:
+                                                  const BorderRadius.all(
                                                 Radius.circular(8),
                                               ),
                                             ),
@@ -379,7 +372,9 @@ class _ProgressPageState extends State<ProgressPage> {
                                                       height: 30,
                                                       width: 30,
                                                       child: ClipRRect(
-                                                        borderRadius: BorderRadius.circular(30),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(30),
                                                         child: Image.asset(
                                                           'assets/profile-picture.jpeg',
                                                           fit: BoxFit.cover,
@@ -388,57 +383,75 @@ class _ProgressPageState extends State<ProgressPage> {
                                                     ),
                                                   ),
                                                   const SizedBox(width: 10),
-                                                   SizedBox(
+                                                  SizedBox(
                                                     width: 100,
                                                     child: Text(
-                                                      textAlign: TextAlign.center,
+                                                      textAlign:
+                                                          TextAlign.center,
                                                       'mp4',
                                                       style: rowTextStyle,
                                                     ),
                                                   ),
                                                   const SizedBox(width: 10),
-                                                   Expanded(
+                                                  Expanded(
                                                     child: Tooltip(
-                                                      message: "Samplevideo1.mp4",
+                                                      message:
+                                                          "Samplevideo1.mp4",
                                                       child: Text(
-                                                        overflow: TextOverflow.ellipsis,
-                                                        textAlign: TextAlign.center,
-                                                        'Samplevideo1.mp4',
-                                                      style: FontFamily.font4.copyWith(color:  Colors.black54,fontSize: 16),
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        basename(c.tobecompressedvideospath[
+                                                                index]),
+                                                        style: FontFamily.font4
+                                                            .copyWith(
+                                                                color: Colors
+                                                                    .black54,
+                                                                fontSize: 16),
                                                       ),
                                                     ),
                                                   ),
                                                   const SizedBox(width: 10),
                                                   Expanded(
                                                     child: Tooltip(
-                                                      message: c.tobecompressedvideospath[index],
+                                                      message:
+                                                          c.tobecompressedvideospath[
+                                                              index],
                                                       child: Text(
-                                                        overflow: TextOverflow.ellipsis,
-                                                        textAlign: TextAlign.center,
-                                                        c.tobecompressedvideospath[index].toString(),
-                                                      style: FontFamily.font4.copyWith(color:  Colors.black,fontSize: 14),
-
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        c.tobecompressedvideospath[
+                                                                index]
+                                                            .toString(),
+                                                        style: FontFamily.font4
+                                                            .copyWith(
+                                                                color: Colors
+                                                                    .black,
+                                                                fontSize: 14),
                                                       ),
                                                     ),
                                                   ),
                                                   const SizedBox(width: 10),
-                                                   SizedBox(
+                                                  SizedBox(
                                                     width: 100,
                                                     child: Text(
-                                                      textAlign: TextAlign.center,
+                                                      textAlign:
+                                                          TextAlign.center,
                                                       '45 MB',
                                                       style: rowTextStyle,
-
                                                     ),
                                                   ),
                                                   const SizedBox(width: 10),
-                                                   SizedBox(
+                                                  SizedBox(
                                                     width: 100,
                                                     child: Text(
-                                                      textAlign: TextAlign.center,
+                                                      textAlign:
+                                                          TextAlign.center,
                                                       '12:20',
                                                       style: rowTextStyle,
-
                                                     ),
                                                   ),
                                                   const SizedBox(width: 10),
@@ -446,7 +459,8 @@ class _ProgressPageState extends State<ProgressPage> {
                                                     width: 60,
                                                     child: Center(
                                                       child: Image(
-                                                        image: AssetImage('assets/close.png'),
+                                                        image: AssetImage(
+                                                            'assets/close.png'),
                                                         width: 10,
                                                         color: Colors.black,
                                                       ),
@@ -456,7 +470,9 @@ class _ProgressPageState extends State<ProgressPage> {
                                                   const SizedBox(
                                                     width: 100,
                                                     child: Center(
-                                                      child: Icon(Icons.check_rounded, size: 20),
+                                                      child: Icon(
+                                                          Icons.check_rounded,
+                                                          size: 20),
                                                     ),
                                                   ),
                                                   const SizedBox(width: 10),
@@ -466,7 +482,8 @@ class _ProgressPageState extends State<ProgressPage> {
                                                       child: IconButton(
                                                         onPressed: () {},
                                                         color: Colors.red,
-                                                        icon: const Icon(Icons.delete_outlined),
+                                                        icon: const Icon(Icons
+                                                            .delete_outlined),
                                                       ),
                                                     ),
                                                   ),
@@ -539,7 +556,8 @@ class _ProgressPageState extends State<ProgressPage> {
                                 child: Container(
                                   height: height * 0.9,
                                   decoration: const BoxDecoration(
-                                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(8)),
                                   ),
                                   child: pages[_selectedIndex],
                                 ),

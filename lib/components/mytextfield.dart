@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:video_encryption/components/colorpage.dart';
 
-class MyTextField extends StatelessWidget {
+class MyTextField extends StatefulWidget {
   final String heading;
   final String hintText;
   final String errorText;
   final double width;
+  final bool isenable;
+
   final void Function()? onTap;
 
   final TextEditingController controller;
@@ -15,8 +18,18 @@ class MyTextField extends StatelessWidget {
       required this.controller,
       required this.errorText,
       required this.heading,
-      required this.onTap,
+      required this.onTap(),
+      required this.isenable,
       required this.hintText});
+
+  @override
+  State<MyTextField> createState() => _MyTextFieldState();
+}
+
+class _MyTextFieldState extends State<MyTextField> {
+  RxBool isReadOnly = true.obs;
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -26,32 +39,78 @@ class MyTextField extends StatelessWidget {
         Row(
           children: [
             Text(
-              heading,
+              widget.heading,
               style: const TextStyle(
                 fontFamily: 'Outfit-Medium',
                 fontSize: 16,
               ),
             ),
-            SizedBox(width: 5,),
-            Icon(Icons.mode_edit_rounded,size: 18,)
+            // const SizedBox(width: 5,),
+            IconButton(
+                onPressed: () {
+                  _showMyDialog(context, widget.heading,
+                      "Do you want to Edit ${widget.heading}?");
+                },
+                icon: const Icon(
+                  Icons.mode_edit_rounded,
+                  size: 15,
+                ))
           ],
         ),
-        TextFormField(
-          onTap: onTap,
-          autovalidateMode: AutovalidateMode.onUserInteraction,
-          style: const TextStyle(color: ColorPage.darkblue),
-          controller: controller,
-          decoration: InputDecoration(
-            hintText: hintText,
+        Obx(
+          () => TextFormField(
+            onEditingComplete: () {
+              isReadOnly.value = true;
+            },
+            enabled: widget.isenable,
+            readOnly: isReadOnly.value,
+            // autofocus: true,
+            // onTap: widget.onTap,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            style: const TextStyle(color: ColorPage.darkblue),
+            controller: widget.controller,
+            decoration: InputDecoration(
+              suffixIcon: widget.isenable
+                  ? isReadOnly.value
+                      ? null
+                      : IconButton(
+                          onPressed: () {
+                            isReadOnly.value = true;
+                          },
+                          icon: const Icon(Icons.check_rounded))
+                  : null,
+              hintText: widget.hintText,
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return widget.errorText;
+              }
+              return null;
+            },
           ),
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return errorText;
-            }
-            return null;
-          },
-        ),
+        )
       ],
+    );
+  }
+
+  Future<void> _showMyDialog(context, String title, String body) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+            title: Text(title),
+            content: Text(body),
+            actions: <Widget>[
+              TextButton(child: const Text('ok'), onPressed: () {
+
+                widget.onTap!(); 
+              isReadOnly.value = false;
+
+                Get.back();
+              })
+            ]);
+      },
     );
   }
 }
