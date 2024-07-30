@@ -170,7 +170,8 @@ class _SettingsPageState extends State<SettingsPage> {
                           Card(
                             elevation: 80,
                             child: Container(
-                              constraints: const BoxConstraints(maxWidth: 600),
+                              constraints: const BoxConstraints(
+                                  maxWidth: 650, minWidth: 500),
                               decoration: BoxDecoration(
                                   color: ColorPage.white,
                                   borderRadius: BorderRadius.circular(10)),
@@ -288,41 +289,78 @@ class _SettingsPageState extends State<SettingsPage> {
                                                 child: SizedBox(
                                                   height: 70,
                                                   child: Tooltip(
-                                                    margin: const EdgeInsets.only(
-                                                        top: 5),
+                                                    margin:
+                                                        const EdgeInsets.only(
+                                                            top: 5),
                                                     message: "Frame Rate",
                                                     child: SizedBox(
                                                       height: 50,
                                                       width: 80,
                                                       child: TextFormField(
-                                                    textAlign: TextAlign.center,
-                                                    keyboardType: TextInputType.number,
-                                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                                                    controller: fps,
-                                                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                                                    decoration: InputDecoration(
-                                                      filled: _showfps,
-                                                      fillColor: Colors.grey[100],
-                                                      border: OutlineInputBorder(
-                                                        borderSide: const BorderSide(color: ColorPage.darkblue),
-                                                        borderRadius: BorderRadius.circular(10),
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        keyboardType:
+                                                            TextInputType
+                                                                .number,
+                                                        inputFormatters: [
+                                                          FilteringTextInputFormatter
+                                                              .digitsOnly
+                                                        ],
+                                                        controller: fps,
+                                                        autovalidateMode:
+                                                            AutovalidateMode
+                                                                .onUserInteraction,
+                                                        decoration:
+                                                            InputDecoration(
+                                                                                                               filled: true,
+
+                                                          fillColor:
+                                                              Colors.grey[100],
+
+                                                          border:
+                                                              OutlineInputBorder(
+                                                            borderSide:
+                                                                const BorderSide(
+                                                                    color: ColorPage
+                                                                        .darkblue),
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10),
+                                                          ),
+                                                          focusedBorder:
+                                                              const OutlineInputBorder(
+                                                            borderSide: BorderSide(
+                                                                color: Colors
+                                                                    .transparent),
+                                                          ),
+                                                          enabledBorder:
+                                                              const OutlineInputBorder(
+                                                            borderSide: BorderSide(
+                                                                color: Colors
+                                                                    .transparent),
+                                                          ),
+                                                          errorStyle:
+                                                              const TextStyle(
+                                                                  height: 0,
+                                                                  color: Colors
+                                                                      .transparent), // Adjust error text style
+                                                          contentPadding:
+                                                              const EdgeInsets
+                                                                  .fromLTRB(
+                                                                  10,
+                                                                  20,
+                                                                  10,
+                                                                  20), // Increase padding as needed
+                                                        ),
+                                                        validator: (value) {
+                                                          if (value == null ||
+                                                              value.isEmpty) {
+                                                            return '*'; // Consider using a more descriptive error message
+                                                          }
+                                                          return null;
+                                                        },
                                                       ),
-                                                      focusedBorder: const OutlineInputBorder(
-                                                        borderSide: BorderSide(color: Colors.transparent),
-                                                      ),
-                                                      enabledBorder: const OutlineInputBorder(
-                                                        borderSide: BorderSide(color: Colors.transparent),
-                                                      ),
-                                                      errorStyle: const TextStyle(height: 0, color: Colors.transparent), // Adjust error text style
-                                                      contentPadding: const EdgeInsets.fromLTRB(10, 20, 10, 20), // Increase padding as needed
-                                                    ),
-                                                    validator: (value) {
-                                                      if (value == null || value.isEmpty) {
-                                                        return '*';  // Consider using a more descriptive error message
-                                                      }
-                                                      return null;
-                                                    },
-                                                  ),
                                                     ),
                                                   ),
                                                 ),
@@ -373,37 +411,66 @@ class _SettingsPageState extends State<SettingsPage> {
                                             child: SizedBox(
                                               height: 70,
                                               child: Tooltip(
-                                                margin:
-                                                    const EdgeInsets.only(top: 5),
+                                                margin: const EdgeInsets.only(
+                                                    top: 5),
                                                 message: "Bit Rate",
                                                 child: SizedBox(
                                                   height: 50,
                                                   width: 80,
                                                   child: TextFormField(
                                                     textAlign: TextAlign.center,
-                                                    keyboardType: TextInputType.number,
-                                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                                    keyboardType:
+                                                        TextInputType.number,
+                                                    inputFormatters: [
+                                                      FilteringTextInputFormatter
+                                                          .digitsOnly
+                                                    ],
                                                     controller: bit,
-                                                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                                                    autovalidateMode:
+                                                        AutovalidateMode
+                                                            .onUserInteraction,
                                                     decoration: InputDecoration(
-                                                      filled: _showbit,
-                                                      fillColor: Colors.grey[100],
-                                                      border: OutlineInputBorder(
-                                                        borderSide: const BorderSide(color: ColorPage.darkblue),
-                                                        borderRadius: BorderRadius.circular(10),
+                                                      filled: true,
+                                                      fillColor:
+                                                          Colors.grey[100],
+                                                      border:
+                                                          OutlineInputBorder(
+                                                        borderSide:
+                                                            const BorderSide(
+                                                                color: ColorPage
+                                                                    .darkblue),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(10),
                                                       ),
-                                                      focusedBorder: const OutlineInputBorder(
-                                                        borderSide: BorderSide(color: Colors.transparent),
+                                                      focusedBorder:
+                                                          const OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                            color: Colors
+                                                                .transparent),
                                                       ),
-                                                      enabledBorder: const OutlineInputBorder(
-                                                        borderSide: BorderSide(color: Colors.transparent),
+                                                      enabledBorder:
+                                                          const OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                            color: Colors
+                                                                .transparent),
                                                       ),
-                                                      errorStyle: const TextStyle(height: 0, color: Colors.transparent), // Adjust error text style
-                                                      contentPadding: const EdgeInsets.fromLTRB(10, 20, 10, 20), // Increase padding as needed
+                                                      errorStyle: const TextStyle(
+                                                          height: 0,
+                                                          color: Colors
+                                                              .transparent), // Adjust error text style
+                                                      contentPadding:
+                                                          const EdgeInsets
+                                                              .fromLTRB(
+                                                              10,
+                                                              20,
+                                                              10,
+                                                              20), // Increase padding as needed
                                                     ),
                                                     validator: (value) {
-                                                      if (value == null || value.isEmpty) {
-                                                        return '*';  // Consider using a more descriptive error message
+                                                      if (value == null ||
+                                                          value.isEmpty) {
+                                                        return '*'; // Consider using a more descriptive error message
                                                       }
                                                       return null;
                                                     },
@@ -503,6 +570,29 @@ class _SettingsPageState extends State<SettingsPage> {
                                               mainAxisAlignment:
                                                   MainAxisAlignment.center,
                                               children: [
+                                                const Expanded(
+                                                    child: SizedBox()),
+                                                FilledButton(
+                                                    style: const ButtonStyle(
+                                                        shape: MaterialStatePropertyAll(
+                                                            RoundedRectangleBorder(
+                                                                borderRadius: BorderRadius
+                                                                    .all(Radius
+                                                                        .circular(
+                                                                            20)))),
+                                                        backgroundColor:
+                                                            MaterialStatePropertyAll(
+                                                                ColorPage
+                                                                    .darkblue),
+                                                        elevation:
+                                                            MaterialStatePropertyAll(
+                                                                10)),
+                                                    onPressed: () async {
+                                                      Get.toNamed(RoutesClass
+                                                          .progresspage);
+                                                    },
+                                                    child:
+                                                        const Text('Progress')),
                                                 const Expanded(
                                                     child: SizedBox()),
                                                 FilledButton(

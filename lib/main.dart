@@ -12,7 +12,7 @@ import 'package:video_encryption/components/colorpage.dart';
 import 'package:video_encryption/controllers/filepath_controller.dart';
 import 'package:video_encryption/controllers/tray_controller.dart';
 import 'package:video_encryption/routes/routes.dart';
-
+// import 'package:video_encryption/test.dart';
 import 'package:window_manager/window_manager.dart';
 
 Future<void> main() async {
@@ -28,14 +28,14 @@ Future<void> main() async {
     // Set packageName parameter to support MSIX.
     // packageName: 'dev.leanflutter.examples.launchatstartupexample',
   );
-// 
+
   // await launchAtStartup.enable();
   // await launchAtStartup.disable();
 
   final FilePath getfilePath = Get.put(FilePath());
   getfilePath.shutdown.value = !await launchAtStartup.isEnabled();
 
-  runApp(const MyApp());
+  runApp( MyApp());
   doWhenWindowReady(() {
     final win = appWindow;
     const initialSize = Size(900, 500);
@@ -47,23 +47,26 @@ Future<void> main() async {
   });
 
   TrayManager.instance.setIcon('assets/tray_icon_original.ico');
-  TrayManager.instance.setContextMenu(Menu(
-    items: [
-      MenuItem(key: 'show_window', label: 'Show Window'),
-      MenuItem(key: 'hide_window', label: 'Hide Window'),
-      MenuItem.separator(),
-      MenuItem(key: 'auto_shutdown', label: 'Auto Shutdown: Off'),
-      MenuItem.separator(),
-      MenuItem(key: 'quit', label: 'Quit'),
-    ],
-  ));
+     TrayManager.instance.setContextMenu(Menu(
+      items: [
+        MenuItem(key: 'show_window', label: 'Progress'),
+        MenuItem(key: 'hide_window', label: 'Settings'),
+        MenuItem.separator(),
+        // MenuItem(
+        //     key: 'auto_shutdown',
+        //     label:
+        //         'Auto Shutdown: ${getfilePath.shutdown.value ? 'On' : 'Off'}'),
+        // MenuItem.separator(),
+        MenuItem(key: 'exit', label: 'Exit'),
+      ],
+    ));
 
   TrayManager.instance.addListener(MyTrayListener());
 
 
 
-String osVersion = Platform.operatingSystemVersion;
-print(osVersion);
+  String osVersion = Platform.operatingSystemVersion;
+  print(osVersion);
 }
 
 class MyApp extends StatefulWidget {
@@ -125,15 +128,12 @@ class MyTrayListener extends TrayListener {
 
      TrayManager.instance.setContextMenu(Menu(
       items: [
-        MenuItem(key: 'show_window', label: 'Show Window'),
-        MenuItem(key: 'hide_window', label: 'Hide Window'),
+        MenuItem(key: 'show_window', label: 'Progress'),
+        MenuItem(key: 'hide_window', label: 'Settings'),
         MenuItem.separator(),
-        MenuItem(
-            key: 'auto_shutdown',
-            label:
-                'Auto Shutdown: ${getfilePath.shutdown.value ? 'On' : 'Off'}'),
-        MenuItem.separator(),
-        MenuItem(key: 'quit', label: 'Quit'),
+        // MenuItem(key: 'auto_shutdown',label:'Auto Shutdown: ${getfilePath.shutdown.value ? 'On' : 'Off'}'),
+        // MenuItem.separator(),
+        MenuItem(key: 'exit', label: 'Exit'),
       ],
     ));
     

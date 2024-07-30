@@ -23,12 +23,18 @@ class MyTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          heading,
-          style: const TextStyle(
-            fontFamily: 'Outfit-Medium',
-            fontSize: 16,
-          ),
+        Row(
+          children: [
+            Text(
+              heading,
+              style: const TextStyle(
+                fontFamily: 'Outfit-Medium',
+                fontSize: 16,
+              ),
+            ),
+            SizedBox(width: 5,),
+            Icon(Icons.mode_edit_rounded,size: 18,)
+          ],
         ),
         TextFormField(
           onTap: onTap,

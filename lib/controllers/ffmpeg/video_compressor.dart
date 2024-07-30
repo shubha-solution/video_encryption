@@ -14,7 +14,7 @@ class RunCommand extends GetxController {
   final TrayController controller = Get.put(TrayController());
 
   RxDouble progress = 0.0.obs;
-  int totalVideoDuration = 1; // To prevent division by zero
+  int totalVideoDuration = 1;  // To prevent division by zero
   bool isCompressing = false; // Flag to track compression state
   bool isDialogOpen = false; // Flag to track if dialog is open
 
@@ -23,9 +23,10 @@ class RunCommand extends GetxController {
     super.onInit();
     // Start monitoring the folder
 
-    Timer.periodic(const Duration(seconds: 10), (timer) {
+    Timer.periodic( const Duration(seconds: 10), (timer) {
       if (c.compress.isTrue) {
         if (!isCompressing) {
+          getfileslist();
           checkForNewFiles();
         }
       }
@@ -39,7 +40,33 @@ class RunCommand extends GetxController {
     return initialSize != newSize;
   }
 
+getfileslist() {
+  final originalDirectory = Directory(c.originalFolderPath.value);
+    final compressedDirectory = Directory(c.compressedFolderPath.value);
+
+    final originalFiles =
+        originalDirectory.listSync().whereType<File>().toList();
+    final compressedFilesList =
+        compressedDirectory.listSync().whereType<File>().toList();
+
+    final compressedFileNames =
+        compressedFilesList.map((file) => basename(file.path)).toSet();
+
+    for (var file in originalFiles) {
+      if (!compressedFileNames.contains(basename(file.path))) {
+    
+    
+   
+         c.tobecompressedvideospath.add(file.path.toString());
+        
+        
+      }
+    }
+    
+}
+
   void checkForNewFiles() async {
+    print("${c.tobecompressedvideospath} file List");
     final originalDirectory = Directory(c.originalFolderPath.value);
     final compressedDirectory = Directory(c.compressedFolderPath.value);
 
@@ -63,7 +90,7 @@ class RunCommand extends GetxController {
         }
       }
     }
-    _closeDialogIfOpen();
+    // _closeDialogIfOpen();
   }
 
   Future<void> compressVideo(String originalFilePath, String encryptedFilePath,
@@ -91,9 +118,9 @@ class RunCommand extends GetxController {
       final completer = Completer<void>();
 
       // Show the progress dialog
-      if (!isDialogOpen) {
-        _showMyDialog(progress, basename(originalFilePath), originalFilePath);
-      }
+      // if (!isDialogOpen) {
+      //   _showMyDialog(progress, basename(originalFilePath), originalFilePath);
+      // }
       controller.startIconFlashing();
 
       process.stderr.transform(utf8.decoder).listen((data) {
@@ -107,7 +134,8 @@ class RunCommand extends GetxController {
           double percentage = (currentTime / totalVideoDuration);
           progress.value = percentage;
         }
-      });
+      },
+      );
 
       process.exitCode.then((code) {
         if (code == 0) {
@@ -171,7 +199,8 @@ class RunCommand extends GetxController {
                 Text('Path: $filepath'),
               ],
             );
-          }),
+          },
+          ),
           actions: <Widget>[
             TextButton(
               child: const Text('Close'),

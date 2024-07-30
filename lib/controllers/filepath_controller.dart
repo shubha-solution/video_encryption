@@ -9,4 +9,8 @@ class FilePath extends GetxController {
   RxBool cloud = false.obs;
   RxBool compress = false.obs;
   RxBool shutdown = false.obs;
+
+  // Progress Page
+  RxList tobecompressedvideospath = [].obs ;
+
 }
