@@ -46,11 +46,14 @@ class _SettingsPageState extends State<SettingsPage> {
 
   setSettingsValue() {
     if (_getfilePath.originalFolderPath.value != "" &&
+    _getfilePath.completedFolderPath.value != "" &&
+
         _getfilePath.compressedFolderPath.value != "" &&
         _getfilePath.fps.value != "" &&
         _getfilePath.bit.value != "") {
       setState(() {
         originalfile.text = _getfilePath.originalFolderPath.value;
+        completedfile.text = _getfilePath.completedFolderPath.value;
         encryptedfile.text = _getfilePath.compressedFolderPath.value;
         fps.text = _getfilePath.fps.value;
         bit.text = _getfilePath.bit.value;
@@ -108,10 +111,10 @@ class _SettingsPageState extends State<SettingsPage> {
     });
   }
 
-
   // Controllers
   TextEditingController devicename = TextEditingController();
   TextEditingController originalfile = TextEditingController();
+  TextEditingController completedfile = TextEditingController();
   TextEditingController encryptedfile = TextEditingController();
   TextEditingController fps = TextEditingController();
   TextEditingController bit = TextEditingController();
@@ -223,8 +226,6 @@ class _SettingsPageState extends State<SettingsPage> {
                                         height: 20,
                                       ),
                                       MyTextField(
-
-
                                         isenable: true,
                                         width: width,
                                         controller: originalfile,
@@ -245,10 +246,10 @@ class _SettingsPageState extends State<SettingsPage> {
                                       const SizedBox(
                                         height: 20,
                                       ),
-                                       MyTextField(
+                                      MyTextField(
                                         isenable: true,
                                         width: width,
-                                        controller: originalfile,
+                                        controller: completedfile,
                                         errorText:
                                             'Please select completed video path',
                                         heading: 'Completed video path',
@@ -258,7 +259,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                               await FileSelector
                                                   .selectDirectory();
                                           if (selectedDirectory != null) {
-                                            originalfile.text =
+                                            completedfile.text =
                                                 selectedDirectory;
                                           }
                                         },
@@ -268,7 +269,6 @@ class _SettingsPageState extends State<SettingsPage> {
                                       ),
                                       MyTextField(
                                         isenable: true,
-
                                         width: width,
                                         controller: encryptedfile,
                                         errorText:
@@ -340,7 +340,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                                                 .onUserInteraction,
                                                         decoration:
                                                             InputDecoration(
-                                                                                                               filled: true,
+                                                          filled: true,
 
                                                           fillColor:
                                                               Colors.grey[100],
@@ -702,13 +702,22 @@ class _SettingsPageState extends State<SettingsPage> {
                                                                   .value =
                                                               encryptedfile
                                                                   .text;
+
                                                           _getfilePath
                                                                   .originalFolderPath
                                                                   .value =
                                                               originalfile.text;
+
+_getfilePath
+                                                                  .completedFolderPath
+                                                                  .value =
+                                                              completedfile.text;
+
+
                                                           _getfilePath
                                                                   .cloud.value =
                                                               uploadtocloude;
+                                                              
                                                           _getfilePath.compress
                                                               .value = compress;
 
@@ -722,6 +731,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                                               .writeSettings(
                                                                   originalfile
                                                                       .text,
+completedfile.text,
                                                                   encryptedfile
                                                                       .text,
                                                                   fps.text,

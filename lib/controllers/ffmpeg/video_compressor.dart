@@ -1,90 +1,105 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ffi';
 import 'dart:io';
-import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:get/get.dart';
-import 'package:video_encryption/components/colorpage.dart';
 import 'package:video_encryption/constants/constants.dart';
 import 'package:video_encryption/controllers/filepath_controller.dart';
+import 'package:video_encryption/controllers/files/files.dart';
 import 'package:video_encryption/controllers/tray_controller.dart';
 
 class RunCommand extends GetxController {
+  SettingsStorage storage = SettingsStorage();
   FilePath c = Get.put(FilePath());
   final TrayController controller = Get.put(TrayController());
 
   RxDouble progress = 0.0.obs;
-  int totalVideoDuration = 1;  // To prevent division by zero
+  int totalVideoDuration = 1; // To prevent division by zero
   bool isCompressing = false; // Flag to track compression state
-  bool isDialogOpen = false; // Flag to track if dialog is open
 
   @override
   void onInit() {
     super.onInit();
-
     Timer.periodic(const Duration(seconds: 10), (timer) {
-      if (c.compress.isTrue && !isCompressing) {
-        getfileslist();
-        startCompressing();
-      }
+      getfileslist();
     });
   }
 
   Future<bool> _isFileStillBeingWritten(File file) async {
-    int initialSize = file.lengthSync();
-    await Future.delayed(const Duration(seconds: 3));
-    int newSize = file.lengthSync();
-    return initialSize != newSize;
+    try {
+      int initialSize = file.lengthSync();
+      await Future.delayed(const Duration(seconds: 3));
+      int newSize = file.lengthSync();
+      return initialSize != newSize;
+    } catch (e) {
+      print('Error checking file size: $e');
+      return false; // Indicate that the file is not being written to, or handle differently based on your use case
+    }
   }
 
   void getfileslist() {
     final originalDirectory = Directory(c.originalFolderPath.value);
-    final compressedDirectory = Directory(c.compressedFolderPath.value);
+    final completedDirectory = Directory(c.completedFolderPath.value);
 
-    final originalFiles =
-        originalDirectory.listSync().whereType<File>().toList();
-    final compressedFilesList =
-        compressedDirectory.listSync().whereType<File>().toList();
+    final videoExtensions = ['.mp4', '.mkv', '.flv'];
 
-    final compressedFileNames =
-        compressedFilesList.map((file) => basename(file.path)).toSet();
+    if (!originalDirectory.existsSync() || !completedDirectory.existsSync()) {
+      return;
+    }
+
+    final originalFiles = originalDirectory
+        .listSync()
+        .where((item) => item is File && videoExtensions.contains(extension(item.path).toLowerCase()))
+        .toList();
 
     for (var file in originalFiles) {
-      if (!compressedFileNames.contains(basename(file.path))) {
+      final specificPathFile = File(join(completedDirectory.path, basename(file.path)));
+      if (!specificPathFile.existsSync() && !c.tobecompressedvideospath.contains(file.path)) {
         c.tobecompressedvideospath.add(file.path);
       }
     }
-  }
 
-void startCompressing() async {
-  List<String> videosToCompress = List.from(c.tobecompressedvideospath);
-
-  for (var video in videosToCompress) {
-    final file = File(video);
-    bool isWriting = await _isFileStillBeingWritten(file);
-    if (!isWriting) {
-      isCompressing = true;
-      c.currentCompressingVide.value = video;
-      await compressVideo(file.path, c.compressedFolderPath.value, c.fps.value, c.bit.value);
-      isCompressing = false;
-      c.tobecompressedvideospath.remove(video); // Safe to modify the original list now
-
-      if (c.tobecompressedvideospath.isEmpty) {
-        break; // Exit loop if no more videos are left
-      }
+    // Start compressing if not already compressing and there are videos to compress
+    if (!isCompressing && c.tobecompressedvideospath.isNotEmpty) {
+      startCompressing();
     }
   }
-}
 
+  void startCompressing() async {
+    isCompressing = true;
+    List<String> videosToCompress = List.from(c.tobecompressedvideospath);
 
-  Future<void> compressVideo(String originalFilePath, String encryptedFilePath,
-      String fps, String bit) async {
+    for (var video in videosToCompress) {
+      video = video.replaceAll(r'\', r'/');
+
+      final file = File(video);
+      bool isWriting = await _isFileStillBeingWritten(file);
+      if (!isWriting) {
+        c.currentCompressingVide.value = video;
+        print(video);
+        bool success = await compressVideo(video, c.compressedFolderPath.value, c.fps.value, c.bit.value);
+
+        if (success) {
+          // Remove the file from the original folder after successful compression
+          await file.delete();
+          c.tobecompressedvideospath.remove(video);
+        } else {
+          print('Compression failed, consider handling rollback');
+        }
+      }
+    }
+
+    isCompressing = false; // Reset the flag when done
+  }
+
+  Future<bool> compressVideo(String originalFilePath, String compressedFilePath, String fps, String bit) async {
     try {
       String ffmpegPath = 'assets/ffmpeg/ffmpeg.exe';
       await _getVideoDuration(ffmpegPath, originalFilePath);
 
-      final outputFilePath = join(encryptedFilePath, basename(originalFilePath));
+      final outputFilePath = join(compressedFilePath, basename(originalFilePath));
+      print("${outputFilePath} Output folder");
+
       List<String> arguments = [
         '-i',
         originalFilePath,
@@ -112,21 +127,32 @@ void startCompressing() async {
         }
       });
 
-      process.exitCode.then((code) {
-        if (code == 0) {
-          MyNotification.showNotification('Compression succeeded');
-        } else {
-          MyNotification.showNotification('Compression failed', isError: true);
-        }
-        progress.value = 0.0; // Reset progress value
-        completer.complete();
-      });
+      int exitCode = await process.exitCode;
+      progress.value = 0.0; // Reset progress value
+      completer.complete();
 
-      await completer.future;
-      controller.stopIconFlashing();
+      if (exitCode == 0) {
+        // Move the file after successful compression
+        String movedFilePath = await moveFile(outputFilePath, c.completedFolderPath.value);
+        if (movedFilePath.isNotEmpty) {
+          storage.savevideonamejson("Sample.mp4");
+          MyNotification.showNotification('Compression and move succeeded');
+          
+          return true; // Indicate success
+        } else {
+          MyNotification.showNotification('Move failed', isError: true);
+          return false; // Indicate failure
+        }
+      } else {
+        MyNotification.showNotification('Compression failed', isError: true);
+        return false; // Indicate failure
+      }
     } catch (e) {
       MyNotification.showNotification('Failed to execute command: $e', isError: true);
       progress.value = 0.0; // Reset progress value
+      return false; // Indicate failure
+    } finally {
+      controller.stopIconFlashing();
     }
   }
 
@@ -142,10 +168,25 @@ void startCompressing() async {
     }
   }
 
-  void _closeDialogIfOpen() {
-    if (isDialogOpen) {
-      Navigator.of(Get.context!).pop();
-      isDialogOpen = false;
+  Future<String> moveFile(String sourcePath, String destinationPath) async {
+    String fullDestinationPath = join(destinationPath, basename(sourcePath));
+    try {
+      final file = File(sourcePath);
+      if (await file.exists()) {
+        final destinationDirectory = Directory(dirname(fullDestinationPath));
+        if (!await destinationDirectory.exists()) {
+          await destinationDirectory.create(recursive: true);
+        }
+        await file.rename(fullDestinationPath);
+        print('File moved to $fullDestinationPath');
+        return fullDestinationPath;
+      } else {
+        print('Source file does not exist.');
+        return ''; // Indicate failure
+      }
+    } catch (e) {
+      print('Error moving file: $e');
+      return ''; // Indicate failure
     }
   }
 }
