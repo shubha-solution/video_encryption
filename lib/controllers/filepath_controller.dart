@@ -12,7 +12,11 @@ class FilePath extends GetxController {
   RxBool shutdown = false.obs;
 
   // Progress Page
+  // RxList<VideoDetails> tobecompressedvideospath = <VideoDetails>[].obs  ;
+
   RxList tobecompressedvideospath = [].obs ;
+  RxList allcompressedvideospath = [].obs ;
+
   RxString currentCompressingVide = "".obs;
 
 }

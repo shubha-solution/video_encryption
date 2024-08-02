@@ -1,0 +1,14 @@
+{
+    "videos": [
+        {
+            "Name": "sample.mp4",
+            "Path": "C:/Users/HP/Downloads/videos/sample.mp4",
+            "Size": "4.1 MB",
+            "Duration": "2.52",
+            "CompletedPath": "C:/Users/HP/Documents/completedfolder",
+            "CompressedPath": "C:/Users/HP/Documents/encrypted video",
+            "Status": "failed",
+            "CompressDate": "2024-08-01 18:39:37.667563"
+        }
+    ]
+}

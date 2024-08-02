@@ -34,3 +34,40 @@
     
   //   // _closeDialogIfOpen();
   // }
+
+
+
+
+
+
+
+    // void getfileslist() 
+  // {
+  //   final originalDirectory = Directory(c.originalFolderPath.value);
+  //   final completedDirectory = Directory(c.completedFolderPath.value);
+
+
+  //   final videoExtensions = ['.mp4', '.mkv', '.flv'];
+
+  //   if (!originalDirectory.existsSync() || !completedDirectory.existsSync()) {
+  //     return;
+  //   }
+
+  //   final originalFiles = originalDirectory
+  //       .listSync()
+  //       .where((item) => item is File && videoExtensions.contains(extension(item.path).toLowerCase()))
+  //       .toList();
+
+  //   for (var file in originalFiles) {
+  //     final specificPathFile = File(join(completedDirectory.path, basename(file.path)));
+  //     if (!specificPathFile.existsSync() && !c.tobecompressedvideospath.contains(file.path)) {
+  //       c.tobecompressedvideospath.add(file.path);
+  //     }
+      
+  //   }
+
+  //   // Start compressing if not already compressing and there are videos to compress
+  //   if (!isCompressing && c.tobecompressedvideospath.isNotEmpty) {
+  //     startCompressing();
+  //   }
+  // }

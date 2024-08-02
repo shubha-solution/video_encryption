@@ -1,66 +1,49 @@
-// ignore_for_file: library_private_types_in_public_api, deprecated_member_use
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
-void main() {
-  runApp(const MyApp());
+class VideoThumbnailExample extends StatefulWidget {
+  @override
+  _VideoThumbnailExampleState createState() => _VideoThumbnailExampleState();
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class _VideoThumbnailExampleState extends State<VideoThumbnailExample> {
+  String? _thumbnailPath;
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Keyboard Event Handling Example'),
-        ),
-        body: const Center(
-          child: KeyHandlingWidget(),
-        ),
-      ),
-    );
+  void initState() {
+    super.initState();
+    _generateThumbnail();
   }
-}
 
-class KeyHandlingWidget extends StatefulWidget {
-  const KeyHandlingWidget({super.key});
+  Future<void> _generateThumbnail() async {
+    final String videoPath = 'C:\Users\HP\Downloads\videos\output.mp4'; // Replace with your video path
+    final Directory tempDir = await getTemporaryDirectory();
 
+    final String? thumbnailPath = await VideoThumbnail.thumbnailFile(
+      video: videoPath,
+      thumbnailPath: tempDir.path,
+      imageFormat: ImageFormat.PNG,
+      maxHeight: 150,
+      quality: 75,
+    );
 
-
-  @override
-  _KeyHandlingWidgetState createState() => _KeyHandlingWidgetState();
-}
-
-class _KeyHandlingWidgetState extends State<KeyHandlingWidget> {
-  final Set<LogicalKeyboardKey> _pressedKeys = {};
+    setState(() {
+      _thumbnailPath = thumbnailPath;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Focus(
-      autofocus: true,
-      onKey: (FocusNode node, RawKeyEvent event) {
-        setState(() {
-          if (event is RawKeyDownEvent) {
-            _pressedKeys.add(event.logicalKey);
-          } else if (event is RawKeyUpEvent) {
-            _pressedKeys.remove(event.logicalKey);
-          }
-        });
-        return KeyEventResult.handled;
-      },
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        color: Colors.grey[200],
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Press keys to see their states:'),
-            ..._pressedKeys.map((key) => Text(key.debugName ?? key.keyLabel)),
-          ],
-        ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Video Thumbnail Example'),
+      ),
+      body: Center(
+        child: _thumbnailPath != null
+            ? Image.file(File(_thumbnailPath!))
+            : CircularProgressIndicator(),
       ),
     );
   }

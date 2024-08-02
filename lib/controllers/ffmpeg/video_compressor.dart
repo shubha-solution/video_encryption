@@ -3,25 +3,30 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart';
 import 'package:get/get.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:video_encryption/constants/constants.dart';
 import 'package:video_encryption/controllers/filepath_controller.dart';
 import 'package:video_encryption/controllers/files/files.dart';
 import 'package:video_encryption/controllers/tray_controller.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 
 class RunCommand extends GetxController {
   SettingsStorage storage = SettingsStorage();
   FilePath c = Get.put(FilePath());
   final TrayController controller = Get.put(TrayController());
-
+  final infoFilePath = 'path/to/info_file.json';
   RxDouble progress = 0.0.obs;
-  int totalVideoDuration = 1; // To prevent division by zero
+  // int totalVideoDuration = 1;
   bool isCompressing = false; // Flag to track compression state
 
   @override
   void onInit() {
     super.onInit();
+    // print(infoFilePath);
     Timer.periodic(const Duration(seconds: 10), (timer) {
-      getfileslist();
+      if (c.tobecompressedvideospath.isEmpty) {
+        getfilesList();
+      }
     });
   }
 
@@ -37,7 +42,7 @@ class RunCommand extends GetxController {
     }
   }
 
-  void getfileslist() {
+  void getfilesList() async {
     final originalDirectory = Directory(c.originalFolderPath.value);
     final completedDirectory = Directory(c.completedFolderPath.value);
 
@@ -49,42 +54,179 @@ class RunCommand extends GetxController {
 
     final originalFiles = originalDirectory
         .listSync()
-        .where((item) => item is File && videoExtensions.contains(extension(item.path).toLowerCase()))
+        .where((item) =>
+            item is File &&
+            videoExtensions.contains(extension(item.path).toLowerCase()))
         .toList();
 
-    for (var file in originalFiles) {
-      final specificPathFile = File(join(completedDirectory.path, basename(file.path)));
-      if (!specificPathFile.existsSync() && !c.tobecompressedvideospath.contains(file.path)) {
-        c.tobecompressedvideospath.add(file.path);
+    for (var fileVideo in originalFiles) {
+      if (fileVideo is File) {
+
+       
+
+        // Check if the file already exists in the completed directory
+        final specificPathFile =
+            File(join(completedDirectory.path, basename(fileVideo.path)));
+        if (!specificPathFile.existsSync() &&
+            !c.tobecompressedvideospath.contains(fileVideo.path)) {
+          // Get the file size in bytes
+          final fileSizeInBytes = fileVideo.lengthSync();
+          // Convert the file size to MB
+          final fileSizeInMB = fileSizeInBytes / (1024 * 1024);
+
+          // Skip files with size 0 MB or greater than 5 GB (5120 MB)
+          if (fileSizeInMB == 0 || fileSizeInMB > 5120) {
+            continue;
+          }
+          
+          var listVideoDuration = await _getVideoDuration(fileVideo.path) / 60.0; 
+DateTime now = DateTime.now();
+          appendFileInfo(
+              
+             infoFilePath,
+              basename(fileVideo.path),
+              fileVideo.path,
+              fileSizeInMB.toStringAsFixed(1),
+              listVideoDuration.toStringAsFixed(2),
+              c.completedFolderPath.value,
+              c.compressedFolderPath.value,
+              now.toString()
+              );
+
+
+// var videoThumbnail = await getVideoThumbnail(fileVideo.path);
+
+          // Store the video details
+          final videoDetails = {
+            // 'image': 'videoThumbnail',
+            'type': extension(fileVideo.path).replaceFirst('.', ''),
+            'name': basename(fileVideo.path),
+            'path': fileVideo.path,
+            'sizeMB': fileSizeInMB.toStringAsFixed(1),
+            'duration': listVideoDuration.toStringAsFixed(2),
+          };
+
+          c.tobecompressedvideospath.add(videoDetails);
+        }
       }
     }
 
     // Start compressing if not already compressing and there are videos to compress
-    if (!isCompressing && c.tobecompressedvideospath.isNotEmpty) {
+    if (c.tobecompressedvideospath.isNotEmpty) {
       startCompressing();
+      print(c.tobecompressedvideospath);
     }
   }
 
+  Future<File> get _localFolderFile async {
+    final path = await _localPath;
+    return File('$path/video_names.json');
+  }
+
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+    return directory.path;
+  }
+
+void appendFileInfo(
+  String fileInfoPath,
+  String fileName,
+  String originalVideoPath,
+  String sizeMB,
+  String duration,
+  String completedPath,
+  String compressedPath,
+  String compressDate,
+) {
+  // Map to hold all data structured by date
+  Map<String, dynamic> jsonData = {};
+
+  // Create a File object for the info file
+  final infoFile = File(fileInfoPath);
+
+  // Read existing file content if it exists
+  if (infoFile.existsSync()) {
+    String content = infoFile.readAsStringSync();
+    if (content.isNotEmpty) {
+      // Parse existing JSON data into the jsonData map
+      jsonData = jsonDecode(content);
+    }
+  } else {
+    // Create the file and any necessary directories if it doesn't exist
+    infoFile.createSync(recursive: true);
+  }
+
+  // Extract date part from compressDate for grouping
+  // String currentDate = compressDate.split(' ')[0];
+
+  // Ensure the currentDate entry exists in jsonData
+
+    jsonData = {
+      'videos': [],
+    };
+  
+
+  // Create a map with the new file information
+  final Map<String, dynamic> fileInfo = {
+    'Name': fileName,
+    'Path': originalVideoPath.replaceAll(r'\', r'/'), // Normalize path separators
+    'Size': '$sizeMB MB', // Size as a string with unit
+    'Duration': duration,
+    'CompletedPath': completedPath,
+    'CompressedPath': compressedPath,
+    'Status': 'failed',
+    'CompressDate': compressDate,
+  };
+
+  // Add the video information to the 'videos' list for the current date
+  jsonData['videos'].add(fileInfo);
+
+  // Convert the updated map to a JSON string
+  final String updatedContent = jsonEncode(jsonData);
+
+  // Write the JSON string to the file
+  infoFile.writeAsStringSync(updatedContent);
+}
+
   void startCompressing() async {
+    if (isCompressing) return; // Prevent re-entrance if already compressing
+
     isCompressing = true;
-    List<String> videosToCompress = List.from(c.tobecompressedvideospath);
+
+List<String> videosToCompress = c.tobecompressedvideospath.map((video) => video["path"].toString()).toList();
+
+    final compressedFolderPath = Directory(c.compressedFolderPath.value);
 
     for (var video in videosToCompress) {
       video = video.replaceAll(r'\', r'/');
-
       final file = File(video);
+      final compressedFilePath =
+          File(join(compressedFolderPath.path, basename(video)));
+
+      if (await compressedFilePath.exists()) {
+        // If the file already exists in the compressed folder, skip compression
+        // MyNotification.showNotification('File $video already compressed');
+        continue;
+      }
+
       bool isWriting = await _isFileStillBeingWritten(file);
       if (!isWriting) {
-        c.currentCompressingVide.value = video;
+        c.currentCompressingVide.value = video.replaceAll(r'\', r'/');
         print(video);
-        bool success = await compressVideo(video, c.compressedFolderPath.value, c.fps.value, c.bit.value);
+
+        // Compress video and handle the result
+        bool success = await compressVideo(
+            video, c.compressedFolderPath.value, c.fps.value, c.bit.value);
 
         if (success) {
-          // Remove the file from the original folder after successful compression
-          await file.delete();
+          // Notify the user of successful compression and remove the video from the list
+          MyNotification.showNotification('Compression succeeded for $video');
           c.tobecompressedvideospath.remove(video);
+          c.allcompressedvideospath.add(video..replaceAll(r'\', r'/'));
         } else {
-          print('Compression failed, consider handling rollback');
+          // Notify the user of failed compression only once per video
+          MyNotification.showNotification('Compression failed for $video',
+              isError: true);
         }
       }
     }
@@ -92,12 +234,14 @@ class RunCommand extends GetxController {
     isCompressing = false; // Reset the flag when done
   }
 
-  Future<bool> compressVideo(String originalFilePath, String compressedFilePath, String fps, String bit) async {
+  Future<bool> compressVideo(String originalFilePath, String compressedFilePath,
+      String fps, String bit) async {
     try {
       String ffmpegPath = 'assets/ffmpeg/ffmpeg.exe';
-      await _getVideoDuration(ffmpegPath, originalFilePath);
+      var totalVideoDuration = await _getVideoDuration(originalFilePath);
 
-      final outputFilePath = join(compressedFilePath, basename(originalFilePath));
+      final outputFilePath =
+          join(compressedFilePath, basename(originalFilePath));
       print("${outputFilePath} Output folder");
 
       List<String> arguments = [
@@ -133,22 +277,17 @@ class RunCommand extends GetxController {
 
       if (exitCode == 0) {
         // Move the file after successful compression
-        String movedFilePath = await moveFile(outputFilePath, c.completedFolderPath.value);
-        if (movedFilePath.isNotEmpty) {
-          storage.savevideonamejson("Sample.mp4");
-          MyNotification.showNotification('Compression and move succeeded');
-          
-          return true; // Indicate success
-        } else {
-          MyNotification.showNotification('Move failed', isError: true);
-          return false; // Indicate failure
-        }
+        await moveFile(originalFilePath, c.completedFolderPath.value);
+
+        return true; // Indicate success
       } else {
-        MyNotification.showNotification('Compression failed', isError: true);
+
         return false; // Indicate failure
       }
     } catch (e) {
-      MyNotification.showNotification('Failed to execute command: $e', isError: true);
+
+      MyNotification.showNotification('Failed to execute command: $e',
+          isError: true);
       progress.value = 0.0; // Reset progress value
       return false; // Indicate failure
     } finally {
@@ -156,8 +295,12 @@ class RunCommand extends GetxController {
     }
   }
 
-  Future<void> _getVideoDuration(String ffmpegPath, String filePath) async {
-    final result = await Process.run(ffmpegPath, ['-i', filePath, '-hide_banner']);
+  Future _getVideoDuration(String filePath) async {
+    String ffmpegPath = 'assets/ffmpeg/ffmpeg.exe';
+
+    var totalVideoDuration = 1;
+    final result =
+        await Process.run(ffmpegPath, ['-i', filePath, '-hide_banner']);
     RegExp regExp = RegExp(r"Duration: (\d+):(\d+):([\d\.]+)");
     Match? match = regExp.firstMatch(result.stderr);
     if (match != null) {
@@ -166,7 +309,20 @@ class RunCommand extends GetxController {
       double seconds = double.parse(match.group(3)!);
       totalVideoDuration = hours * 3600 + minutes * 60 + seconds.toInt();
     }
+    return totalVideoDuration;
   }
+
+  // Future<void> _getVideoDuration(String ffmpegPath, String filePath) async {
+  //   final result = await Process.run(ffmpegPath, ['-i', filePath, '-hide_banner']);
+  //   RegExp regExp = RegExp(r"Duration: (\d+):(\d+):([\d\.]+)");
+  //   Match? match = regExp.firstMatch(result.stderr);
+  //   if (match != null) {
+  //     int hours = int.parse(match.group(1)!);
+  //     int minutes = int.parse(match.group(2)!);
+  //     double seconds = double.parse(match.group(3)!);
+  //     totalVideoDuration = hours * 3600 + minutes * 60 + seconds.toInt();
+  //   }
+  // }
 
   Future<String> moveFile(String sourcePath, String destinationPath) async {
     String fullDestinationPath = join(destinationPath, basename(sourcePath));
@@ -189,4 +345,21 @@ class RunCommand extends GetxController {
       return ''; // Indicate failure
     }
   }
+
+  Future<String> getVideoThumbnail(String videoPath) async {
+  // Get the temporary directory of the app
+  final directory = await getTemporaryDirectory();
+
+  // Generate the thumbnail
+  final thumbnailPath = await VideoThumbnail.thumbnailFile(
+    video: 'C:/Users/HP/Downloads/videos/output.mp4',
+    thumbnailPath: directory.path,
+    imageFormat: ImageFormat.PNG,
+    maxHeight: 150, // specify the height of the thumbnail, keep the aspect ratio
+    quality: 75,    // specify the quality of the thumbnail
+  );
+
+  return thumbnailPath!;
+}
+
 }

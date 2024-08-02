@@ -1,6 +1,9 @@
+import 'dart:ffi';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:path/path.dart';
 import 'package:video_encryption/components/colorpage.dart';
 import 'package:video_encryption/components/completed_list.dart';
 import 'package:video_encryption/components/failed_list.dart';
@@ -30,6 +33,9 @@ class _ProgressPageState extends State<ProgressPage> {
     const Failed(),
     const Others(),
   ];
+
+  RxBool isEnpChecked = false.obs;
+  RxBool isCompressedChecked = false.obs;
 
   RxBool isinProgress = true.obs;
   int _selectedIndex = 0;
@@ -63,528 +69,543 @@ class _ProgressPageState extends State<ProgressPage> {
     var width = MediaQuery.of(context).size.width;
     var height = MediaQuery.of(context).size.height;
 
-    return  
-       Scaffold(
-        backgroundColor: const Color.fromARGB(255, 240, 240, 240),
-        body: Column(
-          children: [
-            const Row(
+    return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 240, 240, 240),
+      body: Column(
+        children: [
+          const Row(
+            children: [
+              Expanded(child: TitleBar()),
+            ],
+          ),
+          Container(
+            padding: const EdgeInsets.all(8.0),
+            height: height - 35,
+            width: width,
+            child: Column(
               children: [
-                Expanded(child: TitleBar()),
-              ],
-            ),
-            Container(
-              padding: const EdgeInsets.all(8.0),
-              height: height - 35,
-              width: width,
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          const SizedBox(
-                            width: 20,
-                          ),
-                          IconButton(
-                              onPressed: () {
-                                Get.back();
-                              },
-                              icon: const Icon(Icons.arrow_back_rounded)),
-                          const SizedBox(
-                            width: 5,
-                          ),
-                          Text('Progress', style: buttonTextStyle),
-                          const SizedBox(
-                            width: 5,
-                          ),
-                          isinProgress.value
-                              ? Text(
-                                  '13',
-                                  style: headingNumber,
-                                )
-                              : const SizedBox()
-                        ],
-                      ),
-                      Obx(
-                        () => isinProgress.value
-                            ? Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Container(
-                                    color: Colors.white,
-                                  ),
-                                  const SizedBox(
-                                    width: 10,
-                                  ),
-                                  MaterialButton(
-                                    color: Colors.blue[700],
-                                    onPressed: () {},
-                                    child: Center(
-                                        child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 5),
-                                      child: Text(
-                                        'Browse',
-                                        style: FontFamily.font3
-                                            .copyWith(fontSize: 14),
-                                      ),
-                                    )),
-                                  ),
-                                  const SizedBox(
-                                    width: 10,
-                                  ),
-                                  MaterialButton(
-                                    shape: ContinuousRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                      side: const BorderSide(
-                                          color: Colors.black54, width: 2),
-                                    ),
-                                    onPressed: () {},
-                                    child: Center(
-                                        child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 5),
-                                      child: Row(
-                                        children: [
-                                          const Icon(
-                                            Icons.cancel_outlined,
-                                            size: 20,
-                                            color: Colors.black54,
-                                          ),
-                                          const SizedBox(
-                                            width: 2,
-                                          ),
-                                          Text(
-                                            'Cancel All',
-                                            style: FontFamily.font3.copyWith(
-                                                fontSize: 14,
-                                                color: Colors.black54,
-                                                fontWeight: FontWeight.w600),
-                                          ),
-                                        ],
-                                      ),
-                                    )),
-                                  ),
-                                  const SizedBox(
-                                    width: 20,
-                                  ),
-                                ],
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        const SizedBox(
+                          width: 20,
+                        ),
+                        IconButton(
+                            onPressed: () {
+                              Get.back();
+                            },
+                            icon: const Icon(Icons.arrow_back_rounded)),
+                        const SizedBox(
+                          width: 5,
+                        ),
+                        Text('Progress', style: buttonTextStyle),
+                        const SizedBox(
+                          width: 5,
+                        ),
+                        isinProgress.value
+                            ? Text(
+                                '13',
+                                style: headingNumber,
                               )
-                            : const SizedBox(),
+                            : const SizedBox()
+                      ],
+                    ),
+                    Obx(
+                      () => isinProgress.value
+                          ? Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                MaterialButton(
+                                  color: Colors.blue[700],
+                                  onPressed: () {},
+                                  child: Center(
+                                      child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 5),
+                                    child: Text(
+                                      'Browse',
+                                      style: FontFamily.font3
+                                          .copyWith(fontSize: 14),
+                                    ),
+                                  )),
+                                ),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                MaterialButton(
+                                  shape: ContinuousRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    side: const BorderSide(
+                                        color: Colors.black54, width: 2),
+                                  ),
+                                  onPressed: () {},
+                                  child: Center(
+                                      child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 5),
+                                    child: Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.cancel_outlined,
+                                          size: 20,
+                                          color: Colors.black54,
+                                        ),
+                                        const SizedBox(
+                                          width: 2,
+                                        ),
+                                        Text(
+                                          'Cancel All',
+                                          style: FontFamily.font3.copyWith(
+                                              fontSize: 14,
+                                              color: Colors.black54,
+                                              fontWeight: FontWeight.w600),
+                                        ),
+                                      ],
+                                    ),
+                                  )),
+                                ),
+                                const SizedBox(
+                                  width: 20,
+                                ),
+                              ],
+                            )
+                          : const SizedBox(),
+                    ),
+                  ],
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Obx(
+                  () => Row(
+                    children: [
+                      const SizedBox(
+                        width: 40,
+                      ),
+                      MaterialButton(
+                        onPressed: () {
+                          isinProgress.value = true;
+                        },
+                        color: isinProgress.value ? ColorPage.darkblue : null,
+                        child: Padding(
+                          padding: const EdgeInsets.all(6.0),
+                          child: Text(
+                            'In Progress',
+                            style: FontFamily.font3.copyWith(
+                              color: !isinProgress.value
+                                  ? ColorPage.darkblue
+                                  : null,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 20),
+                      MaterialButton(
+                        onPressed: () {
+                          isinProgress.value = false;
+                        },
+                        color: !isinProgress.value ? ColorPage.darkblue : null,
+                        child: Padding(
+                          padding: const EdgeInsets.all(6.0),
+                          child: Text(
+                            'History',
+                            style: FontFamily.font3.copyWith(
+                              color: isinProgress.value
+                                  ? ColorPage.darkblue
+                                  : null,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  Obx(
-                    () => Row(
-                      children: [
-                        const SizedBox(
-                          width: 40,
-                        ),
-                        MaterialButton(
-                          onPressed: () {
-                            isinProgress.value = true;
-                          },
-                          color: isinProgress.value ? ColorPage.darkblue : null,
-                          child: Padding(
-                            padding: const EdgeInsets.all(6.0),
-                            child: Text(
-                              'In Progress',
-                              style: FontFamily.font3.copyWith(
-                                color: !isinProgress.value
-                                    ? ColorPage.darkblue
-                                    : null,
-                                fontWeight: FontWeight.w800,
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                Expanded(
+                    child: Obx(
+                  () => isinProgress.value
+                      ? Column(
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 2),
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(8)),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black12,
+                                    blurRadius: 10,
+                                    spreadRadius: 4,
+                                    offset: Offset(8, 8),
+                                  ),
+                                ],
+                              ),
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                    width: 100,
+                                    child: Text(
+                                      textAlign: TextAlign.center,
+                                      'Thumbnail',
+                                      style: headingstyle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  SizedBox(
+                                    width: 100,
+                                    child: Text(
+                                      textAlign: TextAlign.center,
+                                      'Video Type',
+                                      style: headingstyle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      textAlign: TextAlign.center,
+                                      'Video Name',
+                                      style: headingstyle,
+                                      overflow: TextOverflow
+                                          .ellipsis, // Ensures single line with ellipsis if overflow
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      textAlign: TextAlign.center,
+                                      'Location',
+                                      style: headingstyle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  SizedBox(
+                                    width: 130,
+                                    child: Text(
+                                      textAlign: TextAlign.center,
+                                      'Video Size (in MB)',
+                                      style: headingstyle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  SizedBox(
+                                    width: 100,
+                                    child: Text(
+                                      textAlign: TextAlign.center,
+                                      'Duration',
+                                      style: headingstyle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  SizedBox(
+                                    width: 60,
+                                    child: Text(
+                                      textAlign: TextAlign.center,
+                                      'Encrypt',
+                                      style: headingstyle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  SizedBox(
+                                    width: 100,
+                                    child: Text(
+                                      textAlign: TextAlign.center,
+                                      'Compress',
+                                      style: headingstyle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  const SizedBox(width: 40),
+                                ],
                               ),
                             ),
-                          ),
-                        ),
-                        const SizedBox(width: 20),
-                        MaterialButton(
-                          onPressed: () {
-                            isinProgress.value = false;
-                          },
-                          color: !isinProgress.value ? ColorPage.darkblue : null,
-                          child: Padding(
-                            padding: const EdgeInsets.all(6.0),
-                            child: Text(
-                              'History',
-                              style: FontFamily.font3.copyWith(
-                                color: isinProgress.value
-                                    ? ColorPage.darkblue
-                                    : null,
-                                fontWeight: FontWeight.w800,
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: c.tobecompressedvideospath.length,
+                                itemBuilder: (context, index) {
+                                  return InkWell(
+                                    onTap: () {},
+                                    child: Obx(() => Stack(
+                                          alignment: Alignment.center,
+                                          children: [
+                                            c.currentCompressingVide ==
+                                                    c.tobecompressedvideospath[
+                                                            index]["path"]
+                                                        .replaceAll(r'\', r'/')
+                                                ? LinearProgressIndicator(
+                                                    backgroundColor:
+                                                        Colors.transparent,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                    minHeight: 50,
+                                                    color: Colors.blue[300],
+                                                    value: p.progress.value,
+                                                  )
+                                                : const SizedBox(),
+                                            Container(
+                                              margin: const EdgeInsets.all(8),
+                                              decoration: BoxDecoration(
+                                                color: c.allcompressedvideospath
+                                                        .contains(c
+                                                            .tobecompressedvideospath[
+                                                                index]["path"]
+                                                            .replaceAll(
+                                                                r'\', r'/'))
+                                                    ? Colors.green[100]
+                                                    : c.currentCompressingVide ==
+                                                            c.tobecompressedvideospath[
+                                                                    index]
+                                                                    ["path"]
+                                                                .replaceAll(
+                                                                    r'\', r'/')
+                                                        ? Colors.transparent
+                                                        : Colors.white,
+                                                borderRadius:
+                                                    const BorderRadius.all(
+                                                  Radius.circular(8),
+                                                ),
+                                              ),
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Row(
+                                                children: [
+                                                  Container(
+                                                    alignment: Alignment.center,
+                                                    width: 100,
+                                                    child: SizedBox(
+                                                      height: 30,
+                                                      width: 30,
+                                                      child: ClipRRect(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(30),
+                                                        child: Image.asset(
+                                                          // '${c.tobecompressedvideospath[index]["image"]}',
+
+                                                          'assets/profile-picture.jpeg',
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                  SizedBox(
+                                                    width: 100,
+                                                    child: Text(
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      '${c.tobecompressedvideospath[index]["type"]}',
+                                                      style: rowTextStyle,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                  Expanded(
+                                                    child: Tooltip(
+                                                      message:
+                                                          c.tobecompressedvideospath[
+                                                              index]["name"],
+                                                      child: Text(
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        '${c.tobecompressedvideospath[index]["name"]}',
+                                                        style: FontFamily.font4
+                                                            .copyWith(
+                                                                color: Colors
+                                                                    .black54,
+                                                                fontSize: 16),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                  Expanded(
+                                                    child: Tooltip(
+                                                      message:
+                                                          '${c.tobecompressedvideospath[index]["path"].replaceAll(r'\', r'/')}',
+                                                      child: Text(
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        '${c.tobecompressedvideospath[index]["path"].replaceAll(r'\', r'/')}',
+                                                        style: FontFamily.font4
+                                                            .copyWith(
+                                                                color: Colors
+                                                                    .black,
+                                                                fontSize: 14),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                  SizedBox(
+                                                    width: 100,
+                                                    child: Text(
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      '${c.tobecompressedvideospath[index]["sizeMB"]} Mb',
+                                                      style: rowTextStyle,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                  SizedBox(
+                                                    width: 100,
+                                                    child: Text(
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      '${c.tobecompressedvideospath[index]["duration"]}',
+                                                      style: rowTextStyle,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                  SizedBox(
+                                                    width: 60,
+                                                    child: Center(
+                                                      child: Checkbox(
+                                                        checkColor:
+                                                            Colors.white,
+                                                        fillColor:
+                                                            const MaterialStatePropertyAll(
+                                                                Colors.amber),
+                                                        value:
+                                                            isEnpChecked.value,
+                                                        onChanged:
+                                                            (bool? value) {
+                                                          isEnpChecked.value =
+                                                              value!;
+                                                        },
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                  SizedBox(
+                                                    width: 100,
+                                                    child: Center(
+                                                      child: Checkbox(
+                                                        checkColor:
+                                                            Colors.white,
+                                                        fillColor:
+                                                            const MaterialStatePropertyAll(
+                                                                Colors.amber),
+                                                        value:
+                                                            isCompressedChecked
+                                                                .value,
+                                                        onChanged:
+                                                            (bool? value) {
+                                                          isCompressedChecked
+                                                              .value = value!;
+                                                        },
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 10),
+                                                  SizedBox(
+                                                    width: 40,
+                                                    child: Center(
+                                                      child: IconButton(
+                                                        onPressed: () {},
+                                                        color: Colors.red,
+                                                        icon: const Icon(Icons
+                                                            .delete_outlined),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        )),
+                                  );
+                                },
                               ),
                             ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Expanded(
-                    child:
-                    Obx(() =>
-                       isinProgress.value
-                          ? Column(
+                          ],
+                        )
+                      : Row(
+                          children: [
+                            const SizedBox(width: 20),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
                               children: [
+                                const SizedBox(height: 10),
                                 Container(
-                                  margin:
-                                      const EdgeInsets.symmetric(horizontal: 2),
-                                  decoration: const BoxDecoration(
+                                  decoration: BoxDecoration(
                                     color: Colors.white,
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(8)),
-                                    boxShadow: [
+                                    borderRadius: BorderRadius.circular(8),
+                                    boxShadow: const [
                                       BoxShadow(
                                         color: Colors.black12,
                                         blurRadius: 10,
                                         spreadRadius: 4,
-                                        offset: Offset(8, 8),
-                                      )
+                                        offset: Offset(4, 4),
+                                      ),
                                     ],
                                   ),
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Row(
-                                    children: [
-                                      SizedBox(
-                                        width: 100,
-                                        child: Text(
-                                          textAlign: TextAlign.center,
-                                          'Thumbnail',
-                                          style: headingstyle,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      SizedBox(
-                                        width: 100,
-                                        child: Text(
-                                          textAlign: TextAlign.center,
-                                          'Video Type',
-                                          style: headingstyle,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Text(
-                                          textAlign: TextAlign.center,
-                                          'Video Name',
-                                          style: headingstyle,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Text(
-                                          textAlign: TextAlign.center,
-                                          'Location',
-                                          style: headingstyle,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      SizedBox(
-                                        width: 100,
-                                        child: Text(
-                                          textAlign: TextAlign.center,
-                                          'Video Size',
-                                          style: headingstyle,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      SizedBox(
-                                        width: 100,
-                                        child: Text(
-                                          textAlign: TextAlign.center,
-                                          'Duration',
-                                          style: headingstyle,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      SizedBox(
-                                        width: 60,
-                                        child: Text(
-                                          textAlign: TextAlign.center,
-                                          'Encrypt',
-                                          style: headingstyle,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      SizedBox(
-                                        width: 100,
-                                        child: Text(
-                                          textAlign: TextAlign.center,
-                                          'Compress',
-                                          style: headingstyle,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      const SizedBox(width: 40),
-                                    ],
-                                  ),
-                                ),
-                                Expanded(
-                                  child: ListView.builder(
-                                    itemCount: c.tobecompressedvideospath.length,
-                                    itemBuilder: (context, index) {
-                                      // bool isCompressing = index  == c.currentCompressingVide.value;
-                                      // bool isCompressing = index == 1;
-                                      // Change this logic based on your actual condition
-                                      // bool isCompleted = false;
-      
-                                      //// Set this to true when the video is compressed
-                                      // print(c.currentCompressingVide.value);
-                                      return InkWell(
-                                        onTap: () {},
-                                        child: Obx(() =>  Stack(
-                                          alignment: Alignment.center,
-                                          children: [
-                                            
-                                             
-                                              //  c.tobecompressedvideospath[
-                                              //             index] ==
-                                              //         c.currentCompressingVide
-                                              //             .value
-
-                                           index == 0
-                                                  ? LinearProgressIndicator(
-                                                      backgroundColor:
-                                                          Colors.transparent,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              8),
-                                                      minHeight: 50,
-                                                      color: Colors.blue[300],
-                                                      value: p.progress.value,
-                                                    )
-                                                  : const SizedBox(),
-                                        
-                                            
-                                            Container(
-                                              margin: const EdgeInsets.all(8),
-                                              decoration: const BoxDecoration(
-                                                // color: isCompleted
-                                                //     ? Colors.green[100]
-                                                //     : Colors.white,
-                                                borderRadius: BorderRadius.all(
-                                                  Radius.circular(8),
-                                                ),
-                                              ),
-                                              padding: const EdgeInsets.all(8.0),
-                                              child:  Row(
-                                                  children: [
-                                                    Container(
-                                                      alignment: Alignment.center,
-                                                      width: 100,
-                                                      child: SizedBox(
-                                                        height: 30,
-                                                        width: 30,
-                                                        child: ClipRRect(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(30),
-                                                          child: Image.asset(
-                                                            'assets/profile-picture.jpeg',
-                                                            fit: BoxFit.cover,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    const SizedBox(width: 10),
-                                                    SizedBox(
-                                                      width: 100,
-                                                      child: Text(
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                        'mp4',
-                                                        style: rowTextStyle,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(width: 10),
-                                                    Expanded(
-                                                      child: Tooltip(
-                                                        message:
-                                                            "Samplevideo1.mp4",
-                                                        child: Text(
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                          textAlign:
-                                                              TextAlign.center,
-                                                          basename(
-                                                              c.tobecompressedvideospath[
-                                                                  index]),
-                                                          style: FontFamily.font4
-                                                              .copyWith(
-                                                                  color: Colors
-                                                                      .black54,
-                                                                  fontSize: 16),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    const SizedBox(width: 10),
-                                                    Expanded(
-                                                      child: Tooltip(
-                                                        message:
-                                                            c.tobecompressedvideospath[
-                                                                index],
-                                                        child: Text(
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                          textAlign:
-                                                              TextAlign.center,
-                                                          c.tobecompressedvideospath[
-                                                                  index]
-                                                              .toString(),
-                                                          style: FontFamily.font4
-                                                              .copyWith(
-                                                                  color: Colors
-                                                                      .black,
-                                                                  fontSize: 14),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    const SizedBox(width: 10),
-                                                    SizedBox(
-                                                      width: 100,
-                                                      child: Text(
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                        '45 MB',
-                                                        style: rowTextStyle,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(width: 10),
-                                                    SizedBox(
-                                                      width: 100,
-                                                      child: Text(
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                        '12:20',
-                                                        style: rowTextStyle,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(width: 10),
-                                                    const SizedBox(
-                                                      width: 60,
-                                                      child: Center(
-                                                        child: Image(
-                                                          image: AssetImage(
-                                                              'assets/close.png'),
-                                                          width: 10,
-                                                          color: Colors.black,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    const SizedBox(width: 10),
-                                                    const SizedBox(
-                                                      width: 100,
-                                                      child: Center(
-                                                        child: Icon(
-                                                            Icons.check_rounded,
-                                                            size: 20),
-                                                      ),
-                                                    ),
-                                                    const SizedBox(width: 10),
-                                                    SizedBox(
-                                                      width: 40,
-                                                      child: Center(
-                                                        child: IconButton(
-                                                          onPressed: () {},
-                                                          color: Colors.red,
-                                                          icon: const Icon(Icons
-                                                              .delete_outlined),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                
-                                              ),
-                                            ),
-                                          ],
-                                        ),)
-                                      );
+                                  height: 200,
+                                  child: NavigationRail(
+                                    backgroundColor: Colors.transparent,
+                                    selectedIndex: _selectedIndex,
+                                    groupAlignment: groupAlignment,
+                                    onDestinationSelected: (int index) {
+                                      setState(() {
+                                        _selectedIndex = index;
+                                      });
                                     },
-                                  ),
-                                ),
-                              ],)
-                            
-                          : Row(
-                              children: [
-                                const SizedBox(width: 20),
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    const SizedBox(height: 10),
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(8),
-                                        boxShadow: const [
-                                          BoxShadow(
-                                            color: Colors.black12,
-                                            blurRadius: 10,
-                                            spreadRadius: 4,
-                                            offset: Offset(4, 4),
-                                          ),
-                                        ],
+                                    labelType: labelType,
+                                    destinations: const <NavigationRailDestination>[
+                                      NavigationRailDestination(
+                                        icon: Icon(Icons.favorite_border),
+                                        selectedIcon: Icon(Icons.favorite),
+                                        label: Text('Completed'),
                                       ),
-                                      height: 200,
-                                      child: NavigationRail(
-                                        backgroundColor: Colors.transparent,
-                                        selectedIndex: _selectedIndex,
-                                        groupAlignment: groupAlignment,
-                                        onDestinationSelected: (int index) {
-                                          setState(() {
-                                            _selectedIndex = index;
-                                          });
-                                        },
-                                        labelType: labelType,
-                                        destinations: const <NavigationRailDestination>[
-                                          NavigationRailDestination(
-                                            icon: Icon(Icons.favorite_border),
-                                            selectedIcon: Icon(Icons.favorite),
-                                            label: Text('Completed'),
-                                          ),
-                                          NavigationRailDestination(
-                                            icon: Icon(Icons.bookmark_border),
-                                            selectedIcon: Icon(Icons.book),
-                                            label: Text('Failed'),
-                                          ),
-                                          NavigationRailDestination(
-                                            icon: Icon(Icons.star_border),
-                                            selectedIcon: Icon(Icons.star),
-                                            label: Text('Others'),
-                                          ),
-                                        ],
+                                      NavigationRailDestination(
+                                        icon: Icon(Icons.bookmark_border),
+                                        selectedIcon: Icon(Icons.book),
+                                        label: Text('Failed'),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(width: 50),
-                                Expanded(
-                                  child: Container(
-                                    height: height * 0.9,
-                                    decoration: const BoxDecoration(
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(8)),
-                                    ),
-                                    child: pages[_selectedIndex],
+                                      NavigationRailDestination(
+                                        icon: Icon(Icons.star_border),
+                                        selectedIcon: Icon(Icons.star),
+                                        label: Text('Others'),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
-                            ),)
-                    ),
-                  
-                ],
-              ),
+                            ),
+                            const SizedBox(width: 50),
+                            Expanded(
+                              child: Container(
+                                height: height * 0.9,
+                                decoration: const BoxDecoration(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(8)),
+                                ),
+                                child: pages[_selectedIndex],
+                              ),
+                            ),
+                          ],
+                        ),
+                )),
+              ],
             ),
-          ],
-        ),
-      );
-    
+          ),
+        ],
+      ),
+    );
   }
 }

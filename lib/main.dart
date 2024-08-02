@@ -12,6 +12,7 @@ import 'package:video_encryption/components/colorpage.dart';
 import 'package:video_encryption/controllers/filepath_controller.dart';
 import 'package:video_encryption/controllers/tray_controller.dart';
 import 'package:video_encryption/routes/routes.dart';
+import 'package:video_encryption/test/main.dart';
 // import 'package:video_encryption/test.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -87,6 +88,7 @@ class _MyAppState extends State<MyApp> {
         },
         getPages: RoutesClass.routes,
         initialRoute: RoutesClass.login,
+        // home: VideoThumbnailExample(),
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: ColorPage.darkblue),
