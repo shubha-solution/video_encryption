@@ -1,7 +1,9 @@
 import 'package:get/get.dart';
+import 'package:get/get_rx/get_rx.dart';
 
 class FilePath extends GetxController {
   RxString originalFolderPath = ''.obs;
+  RxList originalFiles = [].obs;
   RxString compressedFolderPath = ''.obs;
   RxString completedFolderPath = ''.obs;
 
@@ -16,7 +18,12 @@ class FilePath extends GetxController {
 
   RxList tobecompressedvideospath = [].obs ;
   RxList allcompressedvideospath = [].obs ;
+  RxList<dynamic> videos = [].obs;
+
 
   RxString currentCompressingVide = "".obs;
+
+  final infoFilePath = 'path/to/info_file.json';
+
 
 }

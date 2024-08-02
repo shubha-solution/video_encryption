@@ -70,59 +70,157 @@ class SettingsStorage {
     return File('$path/video_names.json');
   }
 
-Future<File> saveVideoNameJson(String videoName, int isCompleted) async {
-  final file = await _localFolderFile;
+void appendFileInfo(
+  String fileInfoPath,
+  String fileName,
+  String originalVideoPath,
+  String sizeMB,
+  String duration,
+  String completedPath,
+  String compressedPath,
+  String status,
+  String compressDate,
+) {
+  // Map to hold all data structured by date
+  Map<String, dynamic> jsonData = {};
 
-  // Get current date in YYYY-MM-DD format
-  String currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  // Create a File object for the info file
+  final infoFile = File(fileInfoPath);
 
-  // Read the existing file contents
-  String fileContent;
-  Map<String, dynamic> jsonData;
-
-  if (await file.exists()) {
-    fileContent = await file.readAsString();
-    jsonData = json.decode(fileContent) as Map<String, dynamic>;
-  } else {
-    // If file doesn't exist, initialize an empty map
-    jsonData = {};
-  }
-
-  // Determine the category based on the isCompleted value
-  String category;
-  if (isCompleted == 1) {
-    category = 'completed';
-  } else if (isCompleted == 0) {
-    category = 'failed';
-  } else {
-    category = 'others';
-  }
-
-  // Check if the date already exists in the JSON data
-  if (jsonData.containsKey(currentDate)) {
-    // Get the categories map for the current date
-    Map<String, dynamic> dateData = jsonData[currentDate] as Map<String, dynamic>;
-
-    // Ensure the category list exists and add the videoName if not already present
-    if (!dateData.containsKey(category)) {
-      dateData[category] = [];
-    }
-    List<dynamic> videoNames = dateData[category] as List<dynamic>;
-    if (!videoNames.contains(videoName)) {
-      videoNames.add(videoName);
+  // Read existing file content if it exists
+  if (infoFile.existsSync()) {
+    String content = infoFile.readAsStringSync();
+    if (content.isNotEmpty) {
+      // Parse existing JSON data into the jsonData map
+      jsonData = jsonDecode(content);
     }
   } else {
-    // Create a new structure for the date if it doesn't exist
-    jsonData[currentDate] = {
-      'videos': [],
-    };
-
-    // Add the videoName to the appropriate category
-    jsonData[currentDate][category].add(videoName);
+    // Create the file and any necessary directories if it doesn't exist
+    infoFile.createSync(recursive: true);
   }
 
-  // Write the updated JSON data back to the file
-  return file.writeAsString(json.encode(jsonData));
+  // Ensure the 'videos' list exists in jsonData
+  if (!jsonData.containsKey('videos') || jsonData['videos'] is! List) {
+    jsonData['videos'] = [];
+  }
+
+  // Create a map with the new file information
+  final Map<String, dynamic> fileInfo = {
+    'Name': fileName,
+    'Path': originalVideoPath.replaceAll(r'\', r'/'), // Normalize path separators
+    'Size': '$sizeMB MB', // Size as a string with unit
+    'Duration': duration,
+    'CompletedPath': completedPath,
+    'CompressedPath': compressedPath,
+    'Status': status,
+    'CompressDate': compressDate,
+  };
+
+  // Add the video information to the 'videos' list
+  jsonData['videos'].add(fileInfo);
+
+  // Convert the updated map to a JSON string
+  final String updatedContent = jsonEncode(jsonData);
+
+  // Write the JSON string to the file
+  infoFile.writeAsStringSync(updatedContent);
+}
+
+
+void readHistoryVideos(String fileInfoPath) {
+  // Create a File object for the info file
+  final infoFile = File(fileInfoPath);
+
+  try {
+    // Check if the file exists
+    if (infoFile.existsSync()) {
+      // Read the file content as a string
+      String content = infoFile.readAsStringSync();
+
+      // Ensure the content is not empty
+      if (content.isNotEmpty) {
+        // Parse the JSON content
+        Map<String, dynamic> jsonData = jsonDecode(content);
+
+        // Check if the 'videos' key exists and is a list
+        if (jsonData.containsKey('videos') && jsonData['videos'] is List) {
+          // Extract the list of videos
+          _getfilePath.videos.value = List<Map<String, dynamic>>.from(jsonData['videos']);
+
+          // Print the first video name
+          if (_getfilePath.videos.isNotEmpty) {
+            // print(_getfilePath.videos[0]['Name']);
+          } else {
+            print('No videos found.');
+          }
+        } else {
+          print('Invalid JSON format: "videos" key not found or is not a list.');
+        }
+      } else {
+        print('File is empty.');
+      }
+    } else {
+      print('File does not exist.');
+    }
+  } catch (e) {
+    print('An error occurred while reading the file: $e');
+  }
+}
+
+
+
+void updateVideoStatus(String fileInfoPath, String videoPath, String newStatus) {
+  // Create a File object for the info file
+  final infoFile = File(fileInfoPath);
+  try {
+    // Check if the file exists
+    if (infoFile.existsSync()) {
+      // Read the file content as a string
+      String content = infoFile.readAsStringSync();
+
+      // Ensure the content is not empty
+      if (content.isNotEmpty) {
+        // Parse the JSON content
+        Map<String, dynamic> jsonData = jsonDecode(content);
+
+        // Check if the 'videos' key exists and is a list
+        if (jsonData.containsKey('videos') && jsonData['videos'] is List) {
+          // Extract the list of videos
+          List<Map<String, dynamic>> videos = List<Map<String, dynamic>>.from(jsonData['videos']);
+
+          // Find the video with the matching path
+          bool videoFound = false;
+          for (var video in videos) {
+            if (video['Path'] == videoPath.replaceAll(r'\', r'/')) {
+              // Update the status of the matching video
+              video['Status'] = newStatus;
+              videoFound = true;
+              break;
+            }
+          }
+
+          if (videoFound) {
+            // Convert the updated map to a JSON string
+            final String updatedContent = jsonEncode(jsonData);
+
+            // Write the JSON string to the file
+            infoFile.writeAsStringSync(updatedContent);
+            print('Video status updated successfully.');
+          } else {
+            print('No matching video found.');
+          }
+        } else {
+          print('Invalid JSON format: "videos" key not found or is not a list.');
+        }
+      } else {
+        print('File is empty.');
+      }
+    } else {
+      print('File does not exist.');
+    }
+  } catch (e) {
+    print('An error occurred while updating the video status: $e');
+  }
 }
 
 }

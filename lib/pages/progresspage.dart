@@ -1,9 +1,8 @@
-import 'dart:ffi';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:get/get_state_manager/get_state_manager.dart';
+import 'package:intl/intl.dart';
 import 'package:video_encryption/components/colorpage.dart';
 import 'package:video_encryption/components/completed_list.dart';
 import 'package:video_encryption/components/failed_list.dart';
@@ -12,6 +11,7 @@ import 'package:video_encryption/components/others_list.dart';
 import 'package:video_encryption/constants/myfonts.dart';
 import 'package:video_encryption/controllers/ffmpeg/video_compressor.dart';
 import 'package:video_encryption/controllers/filepath_controller.dart';
+import 'package:video_encryption/controllers/files/files.dart';
 import 'package:video_encryption/pages/titlebar/title_bar.dart';
 
 class ProgressPage extends StatefulWidget {
@@ -22,6 +22,8 @@ class ProgressPage extends StatefulWidget {
 }
 
 class _ProgressPageState extends State<ProgressPage> {
+  SettingsStorage storage = SettingsStorage();
+
   List<String> animatedText = [
     'Protect your videos ensure complete security.',
     'Keep your videos safe maintain privacy and security.',
@@ -44,6 +46,7 @@ class _ProgressPageState extends State<ProgressPage> {
   bool showTrailing = false;
   double groupAlignment = -1.0;
 
+  // controllers
   FilePath c = Get.put(FilePath());
   RunCommand p = Get.put(RunCommand());
 
@@ -65,9 +68,41 @@ class _ProgressPageState extends State<ProgressPage> {
       .copyWith(color: const Color.fromARGB(255, 130, 130, 130));
 
   @override
+  void initState() {
+    storage.readHistoryVideos(c.infoFilePath);
+
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     var width = MediaQuery.of(context).size.width;
     var height = MediaQuery.of(context).size.height;
+
+    final Map<String, List<Map<String, dynamic>>> groupedVideos = {};
+    for (var video in c.videos) {
+      final date = DateFormat('dd-MM-yyyy')
+          .format(DateTime.parse(video['CompressDate']));
+      if (!groupedVideos.containsKey(date)) {
+        groupedVideos[date] = [];
+      }
+      groupedVideos[date]!.add(video);
+    }
+
+    final List<String> dates = groupedVideos.keys.toList();
+
+    List<String> filteredDates = dates.where((date) {
+      if (_selectedIndex == 0) {
+        // Show videos where status is true
+        return groupedVideos[date]!.any((video) => video['Status'] == 'true');
+      } else if (_selectedIndex == 1) {
+        // Show videos where status is false
+        return groupedVideos[date]!.any((video) => video['Status'] == 'false');
+      } else {
+        // Show nothing for selectedIndex 2
+        return false;
+      }
+    }).toList();
 
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 240, 240, 240),
@@ -87,30 +122,32 @@ class _ProgressPageState extends State<ProgressPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        const SizedBox(
-                          width: 20,
-                        ),
-                        IconButton(
-                            onPressed: () {
-                              Get.back();
-                            },
-                            icon: const Icon(Icons.arrow_back_rounded)),
-                        const SizedBox(
-                          width: 5,
-                        ),
-                        Text('Progress', style: buttonTextStyle),
-                        const SizedBox(
-                          width: 5,
-                        ),
-                        isinProgress.value
-                            ? Text(
-                                '13',
-                                style: headingNumber,
-                              )
-                            : const SizedBox()
-                      ],
+                    Obx(
+                      () => Row(
+                        children: [
+                          const SizedBox(
+                            width: 20,
+                          ),
+                          IconButton(
+                              onPressed: () {
+                                Get.back();
+                              },
+                              icon: const Icon(Icons.arrow_back_rounded)),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          Text('Progress', style: buttonTextStyle),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          isinProgress.value
+                              ? Text(
+                                  '13',
+                                  style: headingNumber,
+                                )
+                              : const SizedBox()
+                        ],
+                      ),
                     ),
                     Obx(
                       () => isinProgress.value
@@ -256,15 +293,15 @@ class _ProgressPageState extends State<ProgressPage> {
                               padding: const EdgeInsets.all(8.0),
                               child: Row(
                                 children: [
-                                  SizedBox(
-                                    width: 100,
-                                    child: Text(
-                                      textAlign: TextAlign.center,
-                                      'Thumbnail',
-                                      style: headingstyle,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
+                                  // SizedBox(
+                                  //   width: 100,
+                                  //   child: Text(
+                                  //     textAlign: TextAlign.center,
+                                  //     'Thumbnail',
+                                  //     style: headingstyle,
+                                  //   ),
+                                  // ),
+                                  // const SizedBox(width: 10),
                                   SizedBox(
                                     width: 100,
                                     child: Text(
@@ -383,26 +420,26 @@ class _ProgressPageState extends State<ProgressPage> {
                                                   const EdgeInsets.all(8.0),
                                               child: Row(
                                                 children: [
-                                                  Container(
-                                                    alignment: Alignment.center,
-                                                    width: 100,
-                                                    child: SizedBox(
-                                                      height: 30,
-                                                      width: 30,
-                                                      child: ClipRRect(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(30),
-                                                        child: Image.asset(
-                                                          // '${c.tobecompressedvideospath[index]["image"]}',
+                                                  // Container(
+                                                  //   alignment: Alignment.center,
+                                                  //   width: 100,
+                                                  //   child: SizedBox(
+                                                  //     height: 30,
+                                                  //     width: 30,
+                                                  //     child: ClipRRect(
+                                                  //       borderRadius:
+                                                  //           BorderRadius
+                                                  //               .circular(30),
+                                                  //       child: Image.asset(
+                                                  //         // '${c.tobecompressedvideospath[index]["image"]}',
 
-                                                          'assets/profile-picture.jpeg',
-                                                          fit: BoxFit.cover,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 10),
+                                                  //         'assets/profile-picture.jpeg',
+                                                  //         fit: BoxFit.cover,
+                                                  //       ),
+                                                  //     ),
+                                                  //   ),
+                                                  // ),
+                                                  // const SizedBox(width: 10),
                                                   SizedBox(
                                                     width: 100,
                                                     child: Text(
@@ -477,10 +514,11 @@ class _ProgressPageState extends State<ProgressPage> {
                                                     child: Center(
                                                       child: Checkbox(
                                                         checkColor:
-                                                            Colors.white,
+                                                            ColorPage.darkblue,
                                                         fillColor:
                                                             const MaterialStatePropertyAll(
-                                                                Colors.amber),
+                                                                Colors
+                                                                    .transparent),
                                                         value:
                                                             isEnpChecked.value,
                                                         onChanged:
@@ -497,10 +535,11 @@ class _ProgressPageState extends State<ProgressPage> {
                                                     child: Center(
                                                       child: Checkbox(
                                                         checkColor:
-                                                            Colors.white,
+                                                            ColorPage.darkblue,
                                                         fillColor:
                                                             const MaterialStatePropertyAll(
-                                                                Colors.amber),
+                                                                Colors
+                                                                    .transparent),
                                                         value:
                                                             isCompressedChecked
                                                                 .value,
@@ -555,7 +594,7 @@ class _ProgressPageState extends State<ProgressPage> {
                                       ),
                                     ],
                                   ),
-                                  height: 200,
+                                  height: 140,
                                   child: NavigationRail(
                                     backgroundColor: Colors.transparent,
                                     selectedIndex: _selectedIndex,
@@ -568,20 +607,21 @@ class _ProgressPageState extends State<ProgressPage> {
                                     labelType: labelType,
                                     destinations: const <NavigationRailDestination>[
                                       NavigationRailDestination(
-                                        icon: Icon(Icons.favorite_border),
-                                        selectedIcon: Icon(Icons.favorite),
+                                        icon: Icon(Icons.check),
+                                        selectedIcon: Icon(Icons.check_circle),
                                         label: Text('Completed'),
                                       ),
                                       NavigationRailDestination(
-                                        icon: Icon(Icons.bookmark_border),
-                                        selectedIcon: Icon(Icons.book),
+                                        icon: Icon(Icons.warning_amber_rounded),
+                                        selectedIcon:
+                                            Icon(Icons.warning_rounded),
                                         label: Text('Failed'),
                                       ),
-                                      NavigationRailDestination(
-                                        icon: Icon(Icons.star_border),
-                                        selectedIcon: Icon(Icons.star),
-                                        label: Text('Others'),
-                                      ),
+                                      // NavigationRailDestination(
+                                      //   icon: Icon(Icons.star_border),
+                                      //   selectedIcon: Icon(Icons.star),
+                                      //   label: Text('Others'),
+                                      // ),
                                     ],
                                   ),
                                 ),
@@ -595,7 +635,54 @@ class _ProgressPageState extends State<ProgressPage> {
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(8)),
                                 ),
-                                child: pages[_selectedIndex],
+                                child: ListView.builder(
+                                    itemCount: filteredDates.length,
+                                    itemBuilder: (context, index) {
+                                      final date = filteredDates[index];
+                                      final count =
+                                          groupedVideos[date]!.where((video) {
+                                        if (_selectedIndex == 0) {
+                                          return video['Status'] == 'true';
+                                        } else if (_selectedIndex == 1) {
+                                          return video['Status'] == 'false';
+                                        } else {
+                                          return false;
+                                        }
+                                      }).length;
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(vertical: 5),
+                                        child: Material(
+                                          color: Colors.transparent,
+                                          elevation: 10,
+                                          shadowColor: Colors.black26,
+                                          child: ListTile(
+                                            
+                                            shape: ContinuousRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                            minVerticalPadding: 10,
+                                            tileColor: Colors.white,
+                                          
+                                            onTap:() {
+                                               _showMyDialog(context, date, groupedVideos[date]!, _selectedIndex);
+                                          
+                                            },
+                                            subtitle: 
+                                          
+                                                                          Text("$count videos"),
+                                          
+                                          trailing: Icon(Icons.arrow_forward_ios_rounded,size: 16,),
+                                                                          
+                                            title: Text(
+                                              date,
+                                              style: FontFamily.font3.copyWith(
+                                                  color: ColorPage.bluegrey800,
+                                                  fontSize: 18),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }),
+
+                        
                               ),
                             ),
                           ],
@@ -606,6 +693,68 @@ class _ProgressPageState extends State<ProgressPage> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showMyDialog(BuildContext context, String date,
+      List<Map<String, dynamic>> videos, int selectedIndex) {
+    // Filter videos based on the selected index
+    List<Map<String, dynamic>> filteredVideos = videos.where((video) {
+      if (selectedIndex == 0) {
+        return video['Status'] == 'true';
+      } else if (selectedIndex == 1) {
+        return video['Status'] == 'false';
+      } else {
+        return false; // This condition should not happen as we won't call the dialog for selectedIndex == 2
+      }
+    }).toList();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Videos on $date"),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: filteredVideos
+                  .map((video) => Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+color: Colors.white,
+
+                    ),
+                    padding: EdgeInsets.all(7),
+                      margin: const EdgeInsets.all(5),
+                      
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              video['Name'],
+                              style: FontFamily.font3
+                                  .copyWith(color: ColorPage.darkblue),
+                            ),
+                          ),
+                        ],
+                      )))
+                  .toList(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: Text(
+                "Close",
+                style: FontFamily.font3.copyWith(color: ColorPage.darkblue),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -1,9 +1,7 @@
 import 'dart:io';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_instance/get_instance.dart';
-import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:get/get.dart';
 import 'package:launch_at_startup/launch_at_startup.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -13,7 +11,6 @@ import 'package:video_encryption/controllers/filepath_controller.dart';
 import 'package:video_encryption/controllers/tray_controller.dart';
 import 'package:video_encryption/routes/routes.dart';
 import 'package:video_encryption/test/main.dart';
-// import 'package:video_encryption/test.dart';
 import 'package:window_manager/window_manager.dart';
 
 Future<void> main() async {
@@ -36,7 +33,7 @@ Future<void> main() async {
   final FilePath getfilePath = Get.put(FilePath());
   getfilePath.shutdown.value = !await launchAtStartup.isEnabled();
 
-  runApp( MyApp());
+  runApp(const MyApp());
   doWhenWindowReady(() {
     final win = appWindow;
     const initialSize = Size(900, 500);
@@ -48,26 +45,22 @@ Future<void> main() async {
   });
 
   TrayManager.instance.setIcon('assets/tray_icon_original.ico');
-     TrayManager.instance.setContextMenu(Menu(
-      items: [
-        MenuItem(key: 'show_window', label: 'Progress'),
-        MenuItem(key: 'hide_window', label: 'Settings'),
-        MenuItem.separator(),
-        // MenuItem(
-        //     key: 'auto_shutdown',
-        //     label:
-        //         'Auto Shutdown: ${getfilePath.shutdown.value ? 'On' : 'Off'}'),
-        // MenuItem.separator(),
-        MenuItem(key: 'exit', label: 'Exit'),
-      ],
-    ));
+  TrayManager.instance.setContextMenu(Menu(
+    items: [
+      MenuItem(key: 'hide_window', label: 'Hide Window'),
+      MenuItem(key: 'show_window', label: 'Show Window'),
+      MenuItem.separator(),
+      MenuItem(key: 'progress', label: 'Progress'),
+      MenuItem(key: 'settings', label: 'Settings'),
+      MenuItem.separator(),
+      MenuItem(key: 'exit', label: 'Exit'),
+    ],
+  ));
 
   TrayManager.instance.addListener(MyTrayListener());
 
-
-
-  String osVersion = Platform.operatingSystemVersion;
-  print(osVersion);
+  // String osVersion = Platform.operatingSystemVersion;
+  // print(osVersion);
 }
 
 class MyApp extends StatefulWidget {
@@ -78,7 +71,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return OverlaySupport.global(
@@ -88,7 +80,8 @@ class _MyAppState extends State<MyApp> {
         },
         getPages: RoutesClass.routes,
         initialRoute: RoutesClass.login,
-        // home: VideoThumbnailExample(),
+      // home: VideoListScreen(),
+
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: ColorPage.darkblue),
@@ -108,36 +101,21 @@ class MyTrayListener extends TrayListener {
   @override
   void onTrayMenuItemClick(MenuItem menuItem) {
     switch (menuItem.key) {
-      case 'show_window':
-        windowManager.show();
-        break;
       case 'hide_window':
         windowManager.hide();
         break;
-      case 'auto_shutdown':
-        _toggleAutoShutdown();
+      case 'show_window':
+        windowManager.show();
         break;
-      case 'quit':
+      case 'progress':
+        Get.toNamed(RoutesClass.getprogress());
+        break;
+      case 'settings':
+        Get.toNamed(RoutesClass.getsettings());
+        break;
+      case 'exit':
         windowManager.close();
         break;
     }
-  }
-
-  void _toggleAutoShutdown() {
-    
-    final FilePath getfilePath = Get.put(FilePath());
-    getfilePath.shutdown.value = !getfilePath.shutdown.value;
-
-     TrayManager.instance.setContextMenu(Menu(
-      items: [
-        MenuItem(key: 'show_window', label: 'Progress'),
-        MenuItem(key: 'hide_window', label: 'Settings'),
-        MenuItem.separator(),
-        // MenuItem(key: 'auto_shutdown',label:'Auto Shutdown: ${getfilePath.shutdown.value ? 'On' : 'Off'}'),
-        // MenuItem.separator(),
-        MenuItem(key: 'exit', label: 'Exit'),
-      ],
-    ));
-    
   }
 }
