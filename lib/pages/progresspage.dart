@@ -30,12 +30,6 @@ class _ProgressPageState extends State<ProgressPage> {
     'Secure your content safeguard your data.'
   ];
 
-  List<Widget> pages = [
-    const Completed(),
-    const Failed(),
-    const Others(),
-  ];
-
   RxBool isEnpChecked = false.obs;
   RxBool isCompressedChecked = false.obs;
 
@@ -190,6 +184,7 @@ class _ProgressPageState extends State<ProgressPage> {
                                     if (files.isNotEmpty) {
                                       for (var file in files) {
                                         p.addNewVideo(file.path);
+                                        c.checkoriginalvideos.value = true;
                                       }
                                     } else {
                                       print("File selection canceled");
@@ -219,7 +214,7 @@ class _ProgressPageState extends State<ProgressPage> {
                                     onPressed: () {
                                       c.isCanceled.value
                                           ? p.cancelCompression()
-                                          : p.cancelCompression();
+                                          : p.restartCompressing();
                                       c.isCanceled.value = !c.isCanceled.value;
                                     },
                                     child: Center(
@@ -237,7 +232,7 @@ class _ProgressPageState extends State<ProgressPage> {
                                             width: 2,
                                           ),
                                           Text(
-                                            c.isCanceled.value
+                                            !c.isCanceled.value
                                                 ? 'Restart'
                                                 : 'Cancel All',
                                             style: FontFamily.font3.copyWith(
@@ -688,10 +683,16 @@ class _ProgressPageState extends State<ProgressPage> {
                                           );
                                         },
                                       )
-                                    :  Center(
-                                        child:c.checkoriginalvideos.value? const CircularProgressIndicator(
-                                        semanticsLabel: 'Please Wait',
-                                      ):const Text('No video Availble',textScaler: TextScaler.linear(2),))),
+                                    : Center(
+                                        child: c.checkoriginalvideos.value
+                                            ? const CircularProgressIndicator(
+                                                semanticsLabel: 'Please Wait',
+                                              )
+                                            : const Text(
+                                                'No video Availble',
+                                                textScaler:
+                                                    TextScaler.linear(2),
+                                              ))),
                           ],
                         )
                       : Row(
