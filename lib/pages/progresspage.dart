@@ -30,7 +30,6 @@ class _ProgressPageState extends State<ProgressPage> {
     'Secure your content safeguard your data.'
   ];
 
-
   RxBool isEnpChecked = false.obs;
   RxBool isCompressedChecked = false.obs;
 
@@ -185,6 +184,7 @@ class _ProgressPageState extends State<ProgressPage> {
                                     if (files.isNotEmpty) {
                                       for (var file in files) {
                                         p.addNewVideo(file.path);
+                                        c.checkoriginalvideos.value = true;
                                       }
                                     } else {
                                       print("File selection canceled");
@@ -577,12 +577,11 @@ class _ProgressPageState extends State<ProgressPage> {
                                                         SizedBox(
                                                           width: 60,
                                                           child: Center(
-                                                            child: c.currentCompressingVide !=
-                                                                    c.tobecompressedvideospath[
-                                                                            index]
-                                                                            [
-                                                                            "path"]
-                                                                        .replaceAll(
+                                                            child: c.tobecompressedvideospath
+                                                                            .length ==
+                                                                        index ||
+                                                                    c.currentCompressingVide !=
+                                                                        c.tobecompressedvideospath[index]["path"].replaceAll(
                                                                             r'\',
                                                                             r'/')
                                                                 ? Checkbox(
@@ -686,10 +685,16 @@ class _ProgressPageState extends State<ProgressPage> {
                                           );
                                         },
                                       )
-                                    : const Center(
-                                        child: CircularProgressIndicator(
-                                        semanticsLabel: 'Please Wait....',
-                                      ))),
+                                    : Center(
+                                        child: c.checkoriginalvideos.value
+                                            ? const CircularProgressIndicator(
+                                                semanticsLabel: 'Please Wait',
+                                              )
+                                            : const Text(
+                                                'No video Availble',
+                                                textScaler:
+                                                    TextScaler.linear(2),
+                                              ))),
                           ],
                         )
                       : Row(

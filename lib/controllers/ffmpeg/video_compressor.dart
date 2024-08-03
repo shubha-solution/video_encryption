@@ -76,7 +76,10 @@ class RunCommand extends GetxController {
             videoExtensions.contains(extension(item.path).toLowerCase()))
         .cast<File>()
         .toList();
-
+    print(currentFiles);
+    if (currentFiles.isEmpty) {
+      c.checkoriginalvideos.value = false;
+    }
     // Maintain a list of previously seen files
     List<File> previousFiles = List<File>.from(c.originalFiles);
 
@@ -144,7 +147,7 @@ class RunCommand extends GetxController {
       'sizeMB': fileSizeInMB.toStringAsFixed(1),
       'duration': listVideoDuration.toStringAsFixed(2),
     };
-
+    print(videoDetails);
     c.tobecompressedvideospath.add(videoDetails);
   }
 
