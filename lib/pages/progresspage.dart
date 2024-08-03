@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
@@ -70,6 +72,12 @@ class _ProgressPageState extends State<ProgressPage> {
   @override
   void initState() {
     storage.readHistoryVideos(c.infoFilePath);
+
+Timer.periodic(const Duration(seconds: 10), (timer) {
+    storage.readHistoryVideos(c.infoFilePath);
+
+});
+
 
     super.initState();
   }
@@ -669,7 +677,7 @@ class _ProgressPageState extends State<ProgressPage> {
                                           
                                                                           Text("$count videos"),
                                           
-                                          trailing: Icon(Icons.arrow_forward_ios_rounded,size: 16,),
+                                          trailing: const Icon(Icons.arrow_forward_ios_rounded,size: 16,),
                                                                           
                                             title: Text(
                                               date,
@@ -709,52 +717,60 @@ class _ProgressPageState extends State<ProgressPage> {
       }
     }).toList();
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Videos on $date"),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: filteredVideos
-                  .map((video) => Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-color: Colors.white,
-
-                    ),
-                    padding: EdgeInsets.all(7),
-                      margin: const EdgeInsets.all(5),
-                      
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              video['Name'],
-                              style: FontFamily.font3
-                                  .copyWith(color: ColorPage.darkblue),
-                            ),
-                          ),
-                        ],
-                      )))
-                  .toList(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              child: Text(
-                "Close",
-                style: FontFamily.font3.copyWith(color: ColorPage.darkblue),
+showDialog(
+  context: context,
+  builder: (BuildContext context) {
+    return AlertDialog(
+      title: Text("Videos on $date"),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: filteredVideos.asMap().entries.map((entry) {
+            int index = entry.key;
+            var video = entry.value;
+            return Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.white,
               ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
+              padding: const EdgeInsets.all(7),
+              margin: const EdgeInsets.all(5),
+              child: Row(
+                children: [
+                  SizedBox(width: 10),
+
+                  Text(
+                    "${(index + 1).toString()}.",
+                    style: FontFamily.font3.copyWith(color: ColorPage.darkblue),
+                  ),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      video['Name'],
+                      style: FontFamily.font3.copyWith(color: ColorPage.darkblue),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          child: Text(
+            "Close",
+            style: FontFamily.font3.copyWith(color: ColorPage.darkblue),
+          ),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
     );
+  },
+);
+
   }
 }

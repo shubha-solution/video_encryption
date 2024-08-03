@@ -10,7 +10,7 @@ import 'package:video_encryption/components/colorpage.dart';
 import 'package:video_encryption/controllers/filepath_controller.dart';
 import 'package:video_encryption/controllers/tray_controller.dart';
 import 'package:video_encryption/routes/routes.dart';
-import 'package:video_encryption/test/main.dart';
+// import 'package:video_encryption/test/main.dart';
 import 'package:window_manager/window_manager.dart';
 
 Future<void> main() async {
