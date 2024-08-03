@@ -205,42 +205,46 @@ class _ProgressPageState extends State<ProgressPage> {
                                   width: 10,
                                 ),
                                 Obx(
-                                  () => MaterialButton(
-                                    shape: ContinuousRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                      side: const BorderSide(
-                                          color: Colors.black54, width: 2),
-                                    ),
-                                    onPressed: () {
-                                    c.isCanceled.value ? p.cancelCompression() :p.restartCompressing();
-                                    c.isCanceled.value = !c.isCanceled.value;
-                                    },
-                                    child: Center(
-                                        child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 5),
-                                      child: Row(
-                                        children: [
-                                          const Icon(
-                                            Icons.cancel_outlined,
-                                            size: 20,
-                                            color: Colors.black54,
-                                          ),
-                                          const SizedBox(
-                                            width: 2,
-                                          ),
-                                         
-                                             Text(
-                                             !c.isCanceled.value ? 'Restart' : 'Cancel All',
-                                              style: FontFamily.font3.copyWith(
-                                                  fontSize: 14,
-                                                  color: Colors.black54,
-                                                  fontWeight: FontWeight.w600),
-                                            ),
-                                          
-                                        ],
+                                  () =>  Opacity(
+                                    opacity:c.tobecompressedvideospath.isNotEmpty ?1:0.4,
+                                    child: MaterialButton(
+                                                                     
+                                      shape: ContinuousRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        side: const BorderSide(
+                                            color: Colors.black54, width: 2),
                                       ),
-                                    )),
+                                      onPressed:  c.tobecompressedvideospath.isNotEmpty ? () {
+                                      c.isCanceled.value ? p.cancelCompression() :p.restartCompressing();
+                                      c.isCanceled.value = !c.isCanceled.value;
+                                      }: null,
+                                      child: Center(
+                                          child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10, vertical: 5),
+                                        child: Row(
+                                          children: [
+                                            const Icon(
+                                              Icons.cancel_outlined,
+                                              size: 20,
+                                              color: Colors.black54,
+                                            ),
+                                            const SizedBox(
+                                              width: 2,
+                                            ),
+                                           
+                                               Text(
+                                               !c.isCanceled.value ? 'Restart' : 'Cancel All',
+                                                style: FontFamily.font3.copyWith(
+                                                    fontSize: 14,
+                                                    color: Colors.black54,
+                                                    fontWeight: FontWeight.w600),
+                                              ),
+                                            
+                                          ],
+                                        ),
+                                      )),
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(
