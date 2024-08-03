@@ -105,9 +105,11 @@ class RunCommand extends GetxController {
     }
 
     // Check if the file already exists in the completed directory
-    final specificPathFile = File(join(completedDirectory.path, basename(fileVideo.path)));
-    if (specificPathFile.existsSync() || 
-        c.tobecompressedvideospath.any((element) => element['path'] == fileVideo.path)) {
+    final specificPathFile =
+        File(join(completedDirectory.path, basename(fileVideo.path)));
+    if (specificPathFile.existsSync() ||
+        c.tobecompressedvideospath
+            .any((element) => element['path'] == fileVideo.path)) {
       return;
     }
 
@@ -124,16 +126,15 @@ class RunCommand extends GetxController {
 
     String now = DateFormat('yyyy-MM-dd').format(DateTime.now());
     storage.appendFileInfo(
-      c.infoFilePath,
-      basename(fileVideo.path),
-      fileVideo.path,
-      fileSizeInMB.toStringAsFixed(1),
-      listVideoDuration.toStringAsFixed(2),
-      c.completedFolderPath.value,
-      c.compressedFolderPath.value,
-      "false",
-      now.toString()
-    );
+        c.infoFilePath,
+        basename(fileVideo.path),
+        fileVideo.path,
+        fileSizeInMB.toStringAsFixed(1),
+        listVideoDuration.toStringAsFixed(2),
+        c.completedFolderPath.value,
+        c.compressedFolderPath.value,
+        "false",
+        now.toString());
 
     // Store the video details
     final videoDetails = {
@@ -176,7 +177,8 @@ class RunCommand extends GetxController {
 
       video = video.replaceAll(r'\', r'/');
       final file = File(video);
-      final compressedFilePath = File(join(compressedFolderPath.path, basename(video)));
+      final compressedFilePath =
+          File(join(compressedFolderPath.path, basename(video)));
 
       if (await compressedFilePath.exists()) {
         continue;
@@ -212,12 +214,16 @@ class RunCommand extends GetxController {
       String ffmpegPath = 'assets/ffmpeg/ffmpeg.exe';
       var totalVideoDuration = await _getVideoDuration(originalFilePath);
 
-      final outputFilePath = join(compressedFilePath, basename(originalFilePath));
+      final outputFilePath =
+          join(compressedFilePath, basename(originalFilePath));
 
       List<String> arguments = [
-        '-i', originalFilePath,
-        '-b:v', '${bit}k',
-        '-r', fps,
+        '-i',
+        originalFilePath,
+        '-b:v',
+        '${bit}k',
+        '-r',
+        fps,
         outputFilePath,
       ];
       final process = await Process.start(ffmpegPath, arguments);
@@ -266,7 +272,8 @@ class RunCommand extends GetxController {
     String ffmpegPath = 'assets/ffmpeg/ffmpeg.exe';
 
     int totalVideoDuration = 1;
-    final result = await Process.run(ffmpegPath, ['-i', filePath, '-hide_banner']);
+    final result =
+        await Process.run(ffmpegPath, ['-i', filePath, '-hide_banner']);
     RegExp regExp = RegExp(r"Duration: (\d+):(\d+):([\d\.]+)");
     Match? match = regExp.firstMatch(result.stderr);
     if (match != null) {
@@ -307,7 +314,8 @@ class RunCommand extends GetxController {
       video: videoPath,
       thumbnailPath: directory.path,
       imageFormat: ImageFormat.PNG,
-      maxHeight: 150, // specify the height of the thumbnail, keep the aspect ratio
+      maxHeight:
+          150, // specify the height of the thumbnail, keep the aspect ratio
       quality: 75, // specify the quality of the thumbnail
     );
 
