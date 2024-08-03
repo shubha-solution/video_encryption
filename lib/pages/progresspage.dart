@@ -30,11 +30,6 @@ class _ProgressPageState extends State<ProgressPage> {
     'Secure your content safeguard your data.'
   ];
 
-  List<Widget> pages = [
-    const Completed(),
-    const Failed(),
-    const Others(),
-  ];
 
   RxBool isEnpChecked = false.obs;
   RxBool isCompressedChecked = false.obs;
@@ -206,7 +201,7 @@ Timer.periodic(const Duration(seconds: 10), (timer) {
                                           color: Colors.black54, width: 2),
                                     ),
                                     onPressed: () {
-                                    c.isCanceled.value ? p.cancelCompression() :p.cancelCompression();
+                                    c.isCanceled.value ? p.cancelCompression() :p.restartCompressing();
                                     c.isCanceled.value = !c.isCanceled.value;
                                     },
                                     child: Center(
@@ -225,7 +220,7 @@ Timer.periodic(const Duration(seconds: 10), (timer) {
                                           ),
                                          
                                              Text(
-                                             c.isCanceled.value ? 'Restart' : 'Cancel All',
+                                             !c.isCanceled.value ? 'Restart' : 'Cancel All',
                                               style: FontFamily.font3.copyWith(
                                                   fontSize: 14,
                                                   color: Colors.black54,

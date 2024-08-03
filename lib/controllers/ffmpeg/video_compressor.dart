@@ -17,6 +17,7 @@ class RunCommand extends GetxController {
   final TrayController controller = Get.put(TrayController());
   RxDouble progress = 0.0.obs;
   bool isCompressing = false; // Flag to track compression state
+  bool cancelRequested = false; // Flag to track if cancellation is requested
   Process? currentProcess; // Reference to the current compression process
 
   @override
@@ -28,13 +29,21 @@ class RunCommand extends GetxController {
   }
 
   void cancelCompression() {
-
     if (currentProcess != null) {
       currentProcess!.kill(); // Kill the current process
       isCompressing = false; // Reset the flag
       progress.value = 0.0; // Reset progress
       controller.stopIconFlashing(); // Stop the tray icon flashing
       MyNotification.showNotification('Compression cancelled', isError: true);
+      cancelRequested = true; // Set the cancel requested flag
+    }
+  }
+
+  void restartCompressing() {
+    if (!isCompressing) {
+      cancelRequested = false; // Reset the cancel requested flag
+      startCompressing(); // Start compressing again
+      MyNotification.showNotification('Compression restarted');
     }
   }
 
@@ -82,7 +91,7 @@ class RunCommand extends GetxController {
     }
 
     // Start compressing if not already compressing and there are videos to compress
-    if (!c.isCanceled.value && c.tobecompressedvideospath.isNotEmpty) {
+    if (c.tobecompressedvideospath.isNotEmpty && !cancelRequested) {
       startCompressing();
     }
   }
@@ -149,7 +158,7 @@ class RunCommand extends GetxController {
   }
 
   void startCompressing() async {
-    if (isCompressing) return; // Prevent re-entrance if already compressing
+    if (isCompressing || cancelRequested) return; // Prevent re-entrance if already compressing or cancellation is requested
 
     isCompressing = true;
 
@@ -160,6 +169,11 @@ class RunCommand extends GetxController {
     final compressedFolderPath = Directory(c.compressedFolderPath.value);
 
     for (var video in videosToCompress) {
+      if (cancelRequested) {
+        isCompressing = false;
+        return; // Stop processing if cancellation is requested
+      }
+
       video = video.replaceAll(r'\', r'/');
       final file = File(video);
       final compressedFilePath = File(join(compressedFolderPath.path, basename(video)));
@@ -189,6 +203,7 @@ class RunCommand extends GetxController {
     }
 
     isCompressing = false; // Reset the flag when done
+    cancelRequested = false; // Reset the cancel requested flag
   }
 
   Future<bool> compressVideo(String originalFilePath, String compressedFilePath,
@@ -235,8 +250,10 @@ class RunCommand extends GetxController {
         return false; // Indicate failure
       }
     } catch (e) {
-      MyNotification.showNotification('Failed to execute command: $e',
-          isError: true);
+      if (!cancelRequested) {
+        MyNotification.showNotification('Failed to execute command: $e',
+            isError: true);
+      }
       progress.value = 0.0; // Reset progress value
       return false; // Indicate failure
     } finally {
