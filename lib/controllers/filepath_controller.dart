@@ -16,14 +16,11 @@ class FilePath extends GetxController {
   // Progress Page
   // RxList<VideoDetails> tobecompressedvideospath = <VideoDetails>[].obs  ;
 
-  RxList tobecompressedvideospath = [].obs ;
-  RxList allcompressedvideospath = [].obs ;
+  RxList tobecompressedvideospath = [].obs;
+  RxList allcompressedvideospath = [].obs;
   RxList<dynamic> videos = [].obs;
-
 
   RxString currentCompressingVide = "".obs;
 
   final infoFilePath = 'path/to/info_file.json';
-
-
 }

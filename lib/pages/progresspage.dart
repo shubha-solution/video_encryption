@@ -47,6 +47,7 @@ class _ProgressPageState extends State<ProgressPage> {
   bool showLeading = false;
   bool showTrailing = false;
   double groupAlignment = -1.0;
+  RxBool isCompressing = false.obs;
 
   // controllers
   FilePath c = Get.put(FilePath());
@@ -73,13 +74,23 @@ class _ProgressPageState extends State<ProgressPage> {
   void initState() {
     storage.readHistoryVideos(c.infoFilePath);
 
-Timer.periodic(const Duration(seconds: 10), (timer) {
-    storage.readHistoryVideos(c.infoFilePath);
-
-});
-
+    Timer.periodic(const Duration(seconds: 10), (timer) {
+      storage.readHistoryVideos(c.infoFilePath);
+    });
 
     super.initState();
+  }
+
+  var checkboxStates = <String, bool>{}.obs;
+
+  // Method to get the state of a specific checkbox
+  bool isChecked(String path) {
+    return checkboxStates[path] ?? false;
+  }
+
+  // Method to set the state of a specific checkbox
+  void setChecked(String path, bool value) {
+    checkboxStates[path] = value;
   }
 
   @override
@@ -381,201 +392,253 @@ Timer.periodic(const Duration(seconds: 10), (timer) {
                               child: ListView.builder(
                                 itemCount: c.tobecompressedvideospath.length,
                                 itemBuilder: (context, index) {
+                                  print(index);
                                   return InkWell(
                                     onTap: () {},
-                                    child: Obx(() => Stack(
-                                          alignment: Alignment.center,
-                                          children: [
-                                            c.currentCompressingVide ==
-                                                    c.tobecompressedvideospath[
-                                                            index]["path"]
-                                                        .replaceAll(r'\', r'/')
-                                                ? LinearProgressIndicator(
-                                                    backgroundColor:
-                                                        Colors.transparent,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                    minHeight: 50,
-                                                    color: Colors.blue[300],
-                                                    value: p.progress.value,
-                                                  )
-                                                : const SizedBox(),
-                                            Container(
-                                              margin: const EdgeInsets.all(8),
-                                              decoration: BoxDecoration(
-                                                color: c.allcompressedvideospath
-                                                        .contains(c
-                                                            .tobecompressedvideospath[
-                                                                index]["path"]
-                                                            .replaceAll(
-                                                                r'\', r'/'))
-                                                    ? Colors.green[100]
-                                                    : c.currentCompressingVide ==
+                                    child: Obx(() {
+                                      return Stack(
+                                        alignment: Alignment.center,
+                                        children: [
+                                          c.currentCompressingVide ==
+                                                  c.tobecompressedvideospath[
+                                                          index]["path"]
+                                                      .replaceAll(r'\', r'/')
+                                              ? LinearProgressIndicator(
+                                                  backgroundColor:
+                                                      Colors.transparent,
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  minHeight: 50,
+                                                  color: Colors.blue[300],
+                                                  value: p.progress.value,
+                                                )
+                                              : const SizedBox(),
+                                          Container(
+                                            margin: const EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                              color: c.allcompressedvideospath
+                                                      .contains(c
+                                                          .tobecompressedvideospath[
+                                                              index]["path"]
+                                                          .replaceAll(
+                                                              r'\', r'/'))
+                                                  ? Colors.green[100]
+                                                  : c.currentCompressingVide ==
+                                                          c.tobecompressedvideospath[
+                                                                  index]["path"]
+                                                              .replaceAll(
+                                                                  r'\', r'/')
+                                                      ? Colors.transparent
+                                                      : Colors.white,
+                                              borderRadius:
+                                                  const BorderRadius.all(
+                                                Radius.circular(8),
+                                              ),
+                                            ),
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Row(
+                                              children: [
+                                                // Container(
+                                                //   alignment: Alignment.center,
+                                                //   width: 100,
+                                                //   child: SizedBox(
+                                                //     height: 30,
+                                                //     width: 30,
+                                                //     child: ClipRRect(
+                                                //       borderRadius:
+                                                //           BorderRadius
+                                                //               .circular(30),
+                                                //       child: Image.asset(
+                                                //         // '${c.tobecompressedvideospath[index]["image"]}',
+
+                                                //         'assets/profile-picture.jpeg',
+                                                //         fit: BoxFit.cover,
+                                                //       ),
+                                                //     ),
+                                                //   ),
+                                                // ),
+                                                // const SizedBox(width: 10),
+                                                SizedBox(
+                                                  width: 100,
+                                                  child: Text(
+                                                    textAlign: TextAlign.center,
+                                                    '${c.tobecompressedvideospath[index]["type"]}',
+                                                    style: rowTextStyle,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 10),
+                                                Expanded(
+                                                  child: Tooltip(
+                                                    message:
+                                                        c.tobecompressedvideospath[
+                                                            index]["name"],
+                                                    child: Text(
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      '${c.tobecompressedvideospath[index]["name"]}',
+                                                      style: FontFamily.font4
+                                                          .copyWith(
+                                                              color: Colors
+                                                                  .black54,
+                                                              fontSize: 16),
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 10),
+                                                Expanded(
+                                                  child: Tooltip(
+                                                    message:
+                                                        '${c.tobecompressedvideospath[index]["path"].replaceAll(r'\', r'/')}',
+                                                    child: Text(
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      '${c.tobecompressedvideospath[index]["path"].replaceAll(r'\', r'/')}',
+                                                      style: FontFamily.font4
+                                                          .copyWith(
+                                                              color:
+                                                                  Colors.black,
+                                                              fontSize: 14),
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 10),
+                                                SizedBox(
+                                                  width: 100,
+                                                  child: Text(
+                                                    textAlign: TextAlign.center,
+                                                    '${c.tobecompressedvideospath[index]["sizeMB"]} Mb',
+                                                    style: rowTextStyle,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 10),
+                                                SizedBox(
+                                                  width: 100,
+                                                  child: Text(
+                                                    textAlign: TextAlign.center,
+                                                    '${c.tobecompressedvideospath[index]["duration"]}',
+                                                    style: rowTextStyle,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 10),
+                                                SizedBox(
+                                                  width: 60,
+                                                  child: Center(
+                                                    child: c.currentCompressingVide !=
                                                             c.tobecompressedvideospath[
                                                                     index]
                                                                     ["path"]
                                                                 .replaceAll(
                                                                     r'\', r'/')
-                                                        ? Colors.transparent
-                                                        : Colors.white,
-                                                borderRadius:
-                                                    const BorderRadius.all(
-                                                  Radius.circular(8),
+                                                        ? Checkbox(
+                                                            checkColor:
+                                                                ColorPage
+                                                                    .darkblue,
+                                                            fillColor:
+                                                                const MaterialStatePropertyAll(
+                                                                    Colors
+                                                                        .transparent),
+                                                            value: isChecked(c
+                                                                .tobecompressedvideospath[
+                                                                    index]
+                                                                    ["path"]
+                                                                .replaceAll(
+                                                                    r'\',
+                                                                    r'/')),
+                                                            onChanged: c.allcompressedvideospath.contains(c
+                                                                    .tobecompressedvideospath[
+                                                                        index]
+                                                                        ["path"]
+                                                                    .replaceAll(
+                                                                        r'\',
+                                                                        r'/'))
+                                                                ? null
+                                                                : (bool?
+                                                                    value) {
+                                                                    setChecked(
+                                                                        c.tobecompressedvideospath[index]["path"].replaceAll(
+                                                                            r'\',
+                                                                            r'/'),
+                                                                        value!);
+                                                                  },
+                                                          )
+                                                        : null,
+                                                  ),
                                                 ),
-                                              ),
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Row(
-                                                children: [
-                                                  // Container(
-                                                  //   alignment: Alignment.center,
-                                                  //   width: 100,
-                                                  //   child: SizedBox(
-                                                  //     height: 30,
-                                                  //     width: 30,
-                                                  //     child: ClipRRect(
-                                                  //       borderRadius:
-                                                  //           BorderRadius
-                                                  //               .circular(30),
-                                                  //       child: Image.asset(
-                                                  //         // '${c.tobecompressedvideospath[index]["image"]}',
-
-                                                  //         'assets/profile-picture.jpeg',
-                                                  //         fit: BoxFit.cover,
-                                                  //       ),
-                                                  //     ),
-                                                  //   ),
-                                                  // ),
-                                                  // const SizedBox(width: 10),
-                                                  SizedBox(
-                                                    width: 100,
-                                                    child: Text(
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                      '${c.tobecompressedvideospath[index]["type"]}',
-                                                      style: rowTextStyle,
-                                                    ),
+                                                const SizedBox(width: 10),
+                                                SizedBox(
+                                                  width: 100,
+                                                  child: Center(
+                                                      child: c.currentCompressingVide ==
+                                                              c.tobecompressedvideospath[
+                                                                      index]
+                                                                      ["path"]
+                                                                  .replaceAll(
+                                                                      r'\',
+                                                                      r'/')
+                                                          ? null
+                                                          : Checkbox(
+                                                              checkColor:
+                                                                  ColorPage
+                                                                      .darkblue,
+                                                              fillColor:
+                                                                  const MaterialStatePropertyAll(
+                                                                      Colors
+                                                                          .transparent),
+                                                              value: isChecked(c
+                                                                  .tobecompressedvideospath[
+                                                                      index]
+                                                                      ["path"]
+                                                                  .replaceAll(
+                                                                      r'\',
+                                                                      r'/')),
+                                                              onChanged: c.allcompressedvideospath.contains(c
+                                                                      .tobecompressedvideospath[
+                                                                          index]
+                                                                          [
+                                                                          "path"]
+                                                                      .replaceAll(
+                                                                          r'\',
+                                                                          r'/'))
+                                                                  ? null
+                                                                  : (bool?
+                                                                      value) {
+                                                                      setChecked(
+                                                                          c.tobecompressedvideospath[index]["path"].replaceAll(
+                                                                              r'\',
+                                                                              r'/'),
+                                                                          value!);
+                                                                    },
+                                                            )),
+                                                ),
+                                                const SizedBox(width: 10),
+                                                SizedBox(
+                                                  width: 40,
+                                                  child: Center(
+                                                    child: c.currentCompressingVide !=
+                                                            c.tobecompressedvideospath[
+                                                                    index]
+                                                                    ["path"]
+                                                                .replaceAll(
+                                                                    r'\', r'/')
+                                                        ? IconButton(
+                                                            onPressed: () {},
+                                                            color: Colors.red,
+                                                            icon: const Icon(Icons
+                                                                .delete_outlined),
+                                                          )
+                                                        : null,
                                                   ),
-                                                  const SizedBox(width: 10),
-                                                  Expanded(
-                                                    child: Tooltip(
-                                                      message:
-                                                          c.tobecompressedvideospath[
-                                                              index]["name"],
-                                                      child: Text(
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                        '${c.tobecompressedvideospath[index]["name"]}',
-                                                        style: FontFamily.font4
-                                                            .copyWith(
-                                                                color: Colors
-                                                                    .black54,
-                                                                fontSize: 16),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 10),
-                                                  Expanded(
-                                                    child: Tooltip(
-                                                      message:
-                                                          '${c.tobecompressedvideospath[index]["path"].replaceAll(r'\', r'/')}',
-                                                      child: Text(
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                        '${c.tobecompressedvideospath[index]["path"].replaceAll(r'\', r'/')}',
-                                                        style: FontFamily.font4
-                                                            .copyWith(
-                                                                color: Colors
-                                                                    .black,
-                                                                fontSize: 14),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 10),
-                                                  SizedBox(
-                                                    width: 100,
-                                                    child: Text(
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                      '${c.tobecompressedvideospath[index]["sizeMB"]} Mb',
-                                                      style: rowTextStyle,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 10),
-                                                  SizedBox(
-                                                    width: 100,
-                                                    child: Text(
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                      '${c.tobecompressedvideospath[index]["duration"]}',
-                                                      style: rowTextStyle,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 10),
-                                                  SizedBox(
-                                                    width: 60,
-                                                    child: Center(
-                                                      child: Checkbox(
-                                                        checkColor:
-                                                            ColorPage.darkblue,
-                                                        fillColor:
-                                                            const MaterialStatePropertyAll(
-                                                                Colors
-                                                                    .transparent),
-                                                        value:
-                                                            isEnpChecked.value,
-                                                        onChanged:
-                                                            (bool? value) {
-                                                          isEnpChecked.value =
-                                                              value!;
-                                                        },
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 10),
-                                                  SizedBox(
-                                                    width: 100,
-                                                    child: Center(
-                                                      child: Checkbox(
-                                                        checkColor:
-                                                            ColorPage.darkblue,
-                                                        fillColor:
-                                                            const MaterialStatePropertyAll(
-                                                                Colors
-                                                                    .transparent),
-                                                        value:
-                                                            isCompressedChecked
-                                                                .value,
-                                                        onChanged:
-                                                            (bool? value) {
-                                                          isCompressedChecked
-                                                              .value = value!;
-                                                        },
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 10),
-                                                  SizedBox(
-                                                    width: 40,
-                                                    child: Center(
-                                                      child: IconButton(
-                                                        onPressed: () {},
-                                                        color: Colors.red,
-                                                        icon: const Icon(Icons
-                                                            .delete_outlined),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
+                                                ),
+                                              ],
                                             ),
-                                          ],
-                                        )),
+                                          ),
+                                        ],
+                                      );
+                                    }),
                                   );
                                 },
                               ),
@@ -658,27 +721,30 @@ Timer.periodic(const Duration(seconds: 10), (timer) {
                                         }
                                       }).length;
                                       return Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 5),
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 5),
                                         child: Material(
                                           color: Colors.transparent,
                                           elevation: 10,
                                           shadowColor: Colors.black26,
                                           child: ListTile(
-                                            
-                                            shape: ContinuousRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                            shape: ContinuousRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(20)),
                                             minVerticalPadding: 10,
                                             tileColor: Colors.white,
-                                          
-                                            onTap:() {
-                                               _showMyDialog(context, date, groupedVideos[date]!, _selectedIndex);
-                                          
+                                            onTap: () {
+                                              _showMyDialog(
+                                                  context,
+                                                  date,
+                                                  groupedVideos[date]!,
+                                                  _selectedIndex);
                                             },
-                                            subtitle: 
-                                          
-                                                                          Text("$count videos"),
-                                          
-                                          trailing: const Icon(Icons.arrow_forward_ios_rounded,size: 16,),
-                                                                          
+                                            subtitle: Text("$count videos"),
+                                            trailing: const Icon(
+                                              Icons.arrow_forward_ios_rounded,
+                                              size: 16,
+                                            ),
                                             title: Text(
                                               date,
                                               style: FontFamily.font3.copyWith(
@@ -689,8 +755,6 @@ Timer.periodic(const Duration(seconds: 10), (timer) {
                                         ),
                                       );
                                     }),
-
-                        
                               ),
                             ),
                           ],
@@ -717,60 +781,60 @@ Timer.periodic(const Duration(seconds: 10), (timer) {
       }
     }).toList();
 
-showDialog(
-  context: context,
-  builder: (BuildContext context) {
-    return AlertDialog(
-      title: Text("Videos on $date"),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: filteredVideos.asMap().entries.map((entry) {
-            int index = entry.key;
-            var video = entry.value;
-            return Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.white,
-              ),
-              padding: const EdgeInsets.all(7),
-              margin: const EdgeInsets.all(5),
-              child: Row(
-                children: [
-                  SizedBox(width: 10),
-
-                  Text(
-                    "${(index + 1).toString()}.",
-                    style: FontFamily.font3.copyWith(color: ColorPage.darkblue),
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Videos on $date"),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: filteredVideos.asMap().entries.map((entry) {
+                int index = entry.key;
+                var video = entry.value;
+                return Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white,
                   ),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      video['Name'],
-                      style: FontFamily.font3.copyWith(color: ColorPage.darkblue),
-                    ),
+                  padding: const EdgeInsets.all(7),
+                  margin: const EdgeInsets.all(5),
+                  child: Row(
+                    children: [
+                      SizedBox(width: 10),
+                      Text(
+                        "${(index + 1).toString()}.",
+                        style: FontFamily.font3
+                            .copyWith(color: ColorPage.darkblue),
+                      ),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          video['Name'],
+                          style: FontFamily.font3
+                              .copyWith(color: ColorPage.darkblue),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            );
-          }).toList(),
-        ),
-      ),
-      actions: [
-        TextButton(
-          child: Text(
-            "Close",
-            style: FontFamily.font3.copyWith(color: ColorPage.darkblue),
+                );
+              }).toList(),
+            ),
           ),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-      ],
+          actions: [
+            TextButton(
+              child: Text(
+                "Close",
+                style: FontFamily.font3.copyWith(color: ColorPage.darkblue),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
-  },
-);
-
   }
 }
