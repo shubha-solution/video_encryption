@@ -65,6 +65,15 @@ dependencies:
   launch_at_startup: ^0.3.1
   package_info_plus: ^8.0.0
   video_thumbnail: ^0.5.3
+  msix: ^3.16.7
+
+# msix_config:
+#   display_name: video_encryption
+#   publisher_display_name: Solution Infotech
+#   identity_name: company.suite.flutterapp
+#   msix_version: 1.0.0.0
+#   logo_path: assets/tray_icon_original.png
+#   capabilities: internetClient, location, microphone, webcam
 
   
   # ffmpeg_kit_flutter: ^6.0.3
@@ -76,7 +85,7 @@ dependencies:
 
 
 
-dev_dependencies:
+dev_dependencies: 
   flutter_test:
     sdk: flutter
 

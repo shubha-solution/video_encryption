@@ -215,7 +215,7 @@ class _ProgressPageState extends State<ProgressPage> {
                                             color: Colors.black54, width: 2),
                                       ),
                                       onPressed:  c.tobecompressedvideospath.isNotEmpty ? () {
-                                      c.isCanceled.value ? p.cancelCompression() :p.restartCompressing();
+                                      c.isCanceled.value ?  p.restartCompressing():p.cancelCompression();
                                       c.isCanceled.value = !c.isCanceled.value;
                                       }: null,
                                       child: Center(
@@ -234,7 +234,7 @@ class _ProgressPageState extends State<ProgressPage> {
                                             ),
                                            
                                                Text(
-                                               !c.isCanceled.value ? 'Restart' : 'Cancel All',
+                                               !c.isCanceled.value ? 'Cancel All' : 'Restart',
                                                 style: FontFamily.font3.copyWith(
                                                     fontSize: 14,
                                                     color: Colors.black54,
@@ -666,7 +666,13 @@ class _ProgressPageState extends State<ProgressPage> {
                                                                             r'/')
                                                                 ? IconButton(
                                                                     onPressed:
-                                                                        () {},
+                                                                        () {
+                                                                          print(c.tobecompressedvideospath);
+                                                                        c.tobecompressedvideospath.remove(c.tobecompressedvideospath[index]['path'].replaceAll(
+                                                                            r'\',
+                                                                            r'/'));
+                                                                        print("Removed ${c.tobecompressedvideospath[index]['path']}");
+                                                                        },
                                                                     color: Colors
                                                                         .red,
                                                                     icon: const Icon(
