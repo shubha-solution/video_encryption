@@ -1,9 +1,7 @@
 import 'dart:async';
-
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:intl/intl.dart';
 import 'package:video_encryption/components/colorpage.dart';
 import 'package:video_encryption/components/completed_list.dart';
@@ -47,6 +45,7 @@ class _ProgressPageState extends State<ProgressPage> {
   bool showLeading = false;
   bool showTrailing = false;
   double groupAlignment = -1.0;
+
 
   // controllers
   FilePath c = Get.put(FilePath());
@@ -170,7 +169,21 @@ Timer.periodic(const Duration(seconds: 10), (timer) {
                                 ),
                                 MaterialButton(
                                   color: Colors.blue[700],
-                                  onPressed: () {},
+                                  onPressed: () async {
+              const typeGroup = XTypeGroup(
+                label: 'Videos',
+                extensions: ['mp4', 'mkv', 'flv'],
+              );
+              final List<XFile> files = await openFiles(acceptedTypeGroups: [typeGroup]);
+
+              if (files.isNotEmpty) {
+                for (var file in files) {
+                  p.addNewVideo(file.path);
+                }
+              } else {
+                print("File selection canceled");
+              }
+            },
                                   child: Center(
                                       child: Padding(
                                     padding: const EdgeInsets.symmetric(
@@ -185,37 +198,44 @@ Timer.periodic(const Duration(seconds: 10), (timer) {
                                 const SizedBox(
                                   width: 10,
                                 ),
-                                MaterialButton(
-                                  shape: ContinuousRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    side: const BorderSide(
-                                        color: Colors.black54, width: 2),
-                                  ),
-                                  onPressed: () {},
-                                  child: Center(
-                                      child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 5),
-                                    child: Row(
-                                      children: [
-                                        const Icon(
-                                          Icons.cancel_outlined,
-                                          size: 20,
-                                          color: Colors.black54,
-                                        ),
-                                        const SizedBox(
-                                          width: 2,
-                                        ),
-                                        Text(
-                                          'Cancel All',
-                                          style: FontFamily.font3.copyWith(
-                                              fontSize: 14,
-                                              color: Colors.black54,
-                                              fontWeight: FontWeight.w600),
-                                        ),
-                                      ],
+                                Obx( ()=>
+                                   MaterialButton(
+                                    shape: ContinuousRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      side:  const BorderSide(
+                                          color: Colors.black54, width: 2),
                                     ),
-                                  )),
+                                    onPressed: () {
+                                    c.isCanceled.value ? p.cancelCompression() :p.cancelCompression();
+                                    c.isCanceled.value = !c.isCanceled.value;
+                                    },
+                                    child: Center(
+                                        child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 5),
+                                      child: Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.cancel_outlined,
+                                            size: 20,
+                                            color: Colors.black54,
+                                          ),
+                                          const SizedBox(
+                                            width: 2,
+                                          ),
+                                         
+                                             Text(
+                                             c.isCanceled.value ? 'Restart' : 'Cancel All',
+                                              style: FontFamily.font3.copyWith(
+                                                  fontSize: 14,
+                                                  color: Colors.black54,
+                                                  fontWeight: FontWeight.w600),
+                                            ),
+                                          
+                                        ],
+                                      ),
+                                    )),
+                                  ),
                                 ),
                                 const SizedBox(
                                   width: 20,
@@ -738,13 +758,13 @@ showDialog(
               margin: const EdgeInsets.all(5),
               child: Row(
                 children: [
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
 
                   Text(
                     "${(index + 1).toString()}.",
                     style: FontFamily.font3.copyWith(color: ColorPage.darkblue),
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       video['Name'],
