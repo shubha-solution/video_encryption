@@ -428,7 +428,7 @@ class _ProgressPageState extends State<ProgressPage> {
                               ),
                             ),
                             Expanded(
-                                child: c.tobecompressedvideospath.isNotEmpty
+                                child: true
                                     ? ListView.builder(
                                         itemCount:
                                             c.tobecompressedvideospath.length,

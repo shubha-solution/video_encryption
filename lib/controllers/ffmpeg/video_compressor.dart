@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'package:get/get.dart';
@@ -23,6 +25,7 @@ class RunCommand extends GetxController {
   @override
   void onInit() {
     super.onInit();
+
     Timer.periodic(const Duration(seconds: 10), (timer) {
       getfilesList();
     });
@@ -76,6 +79,7 @@ class RunCommand extends GetxController {
             videoExtensions.contains(extension(item.path).toLowerCase()))
         .cast<File>()
         .toList();
+
     print(currentFiles);
     if (currentFiles.isEmpty) {
       c.checkoriginalvideos.value = false;
@@ -275,7 +279,7 @@ class RunCommand extends GetxController {
   }
 
   Future<int> _getVideoDuration(String filePath) async {
-    String ffmpegPath = 'assets/ffmpeg/ffmpeg.exe';
+    String ffmpegPath = await getFFmpegPath();
 
     int totalVideoDuration = 1;
     final result =
@@ -289,6 +293,16 @@ class RunCommand extends GetxController {
       totalVideoDuration = hours * 3600 + minutes * 60 + seconds.toInt();
     }
     return totalVideoDuration;
+  }
+
+  Future<String> getFFmpegPath() async {
+    final byteData = await rootBundle.load('assets/ffmpeg/ffmpeg.exe');
+
+    final file = File('${(await getTemporaryDirectory()).path}/ffmpeg.exe');
+    await file.writeAsBytes(byteData.buffer
+        .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+
+    return file.path;
   }
 
   Future<String> moveFile(String sourcePath, String destinationPath) async {

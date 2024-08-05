@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:launch_at_startup/launch_at_startup.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+
 import 'package:tray_manager/tray_manager.dart';
 import 'package:video_encryption/components/colorpage.dart';
 import 'package:video_encryption/controllers/ffmpeg/video_compressor.dart';
@@ -82,6 +83,7 @@ class _MyAppState extends State<MyApp> {
     return OverlaySupport.global(
       child: GetMaterialApp(
         onInit: () {
+          // Get.close(times);
           Get.put(TrayController());
         },
         getPages: RoutesClass.routes,
