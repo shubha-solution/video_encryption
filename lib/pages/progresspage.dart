@@ -4,10 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:video_encryption/components/colorpage.dart';
-import 'package:video_encryption/components/completed_list.dart';
-import 'package:video_encryption/components/failed_list.dart';
 import 'package:video_encryption/components/fontfamily.dart';
-import 'package:video_encryption/components/others_list.dart';
 import 'package:video_encryption/constants/myfonts.dart';
 import 'package:video_encryption/controllers/ffmpeg/video_compressor.dart';
 import 'package:video_encryption/controllers/filepath_controller.dart';
@@ -62,6 +59,8 @@ class _ProgressPageState extends State<ProgressPage> {
   TextStyle rowTextStyle = FontFamily.font3
       .copyWith(color: const Color.fromARGB(255, 130, 130, 130));
 
+  final RxMap<String, bool> compressedState = <String, bool>{}.obs;
+
   @override
   void initState() {
     storage.readHistoryVideos(c.infoFilePath);
@@ -73,16 +72,17 @@ class _ProgressPageState extends State<ProgressPage> {
     super.initState();
   }
 
-  var checkboxStates = <String, bool>{}.obs;
+  String? _selectedVideoPath;
 
-  // Method to get the state of a specific checkbox
   bool isChecked(String path) {
-    return checkboxStates[path] ?? false;
+    return _selectedVideoPath == path;
   }
 
-  // Method to set the state of a specific checkbox
   void setChecked(String path, bool value) {
-    checkboxStates[path] = value;
+    setState(() {
+      _selectedVideoPath = value ? path : null;
+      compressedState[path] = value;
+    });
   }
 
   @override
@@ -171,6 +171,27 @@ class _ProgressPageState extends State<ProgressPage> {
                                 const SizedBox(
                                   width: 10,
                                 ),
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 10),
+                                  child: MaterialButton(
+                                    color: Colors.blue[700],
+                                    onPressed: () async {
+                                      c.tobecompressedvideospath.clear();
+                                      c.allcompressedvideospath.clear();
+                                    },
+                                    child: Center(
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10, vertical: 5),
+                                        child: Text(
+                                          'Clear All',
+                                          style: FontFamily.font3
+                                              .copyWith(fontSize: 14),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
                                 MaterialButton(
                                   color: Colors.blue[700],
                                   onPressed: () async {
@@ -179,6 +200,7 @@ class _ProgressPageState extends State<ProgressPage> {
                                       extensions: ['mp4', 'mkv', 'flv'],
                                     );
                                     final List<XFile> files = await openFiles(
+                                        initialDirectory: 'Upload videos',
                                         acceptedTypeGroups: [typeGroup]);
 
                                     if (files.isNotEmpty) {
@@ -213,8 +235,8 @@ class _ProgressPageState extends State<ProgressPage> {
                                     ),
                                     onPressed: () {
                                       c.isCanceled.value
-                                          ? p.cancelCompression()
-                                          : p.restartCompressing();
+                                          ? p.restartCompressing()
+                                          : p.cancelCompression();
                                       c.isCanceled.value = !c.isCanceled.value;
                                     },
                                     child: Center(
@@ -233,8 +255,8 @@ class _ProgressPageState extends State<ProgressPage> {
                                           ),
                                           Text(
                                             !c.isCanceled.value
-                                                ? 'Restart'
-                                                : 'Cancel All',
+                                                ? 'Cancel All'
+                                                : 'Restart',
                                             style: FontFamily.font3.copyWith(
                                                 fontSize: 14,
                                                 color: Colors.black54,
@@ -329,15 +351,6 @@ class _ProgressPageState extends State<ProgressPage> {
                               padding: const EdgeInsets.all(8.0),
                               child: Row(
                                 children: [
-                                  // SizedBox(
-                                  //   width: 100,
-                                  //   child: Text(
-                                  //     textAlign: TextAlign.center,
-                                  //     'Thumbnail',
-                                  //     style: headingstyle,
-                                  //   ),
-                                  // ),
-                                  // const SizedBox(width: 10),
                                   SizedBox(
                                     width: 100,
                                     child: Text(
@@ -352,8 +365,7 @@ class _ProgressPageState extends State<ProgressPage> {
                                       textAlign: TextAlign.center,
                                       'Video Name',
                                       style: headingstyle,
-                                      overflow: TextOverflow
-                                          .ellipsis, // Ensures single line with ellipsis if overflow
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                   const SizedBox(width: 10),
@@ -412,6 +424,10 @@ class _ProgressPageState extends State<ProgressPage> {
                                             c.tobecompressedvideospath.length,
                                         itemBuilder: (context, index) {
                                           print(index);
+                                          final videoPath = c
+                                              .tobecompressedvideospath[index]
+                                                  ["path"]
+                                              .replaceAll(r'\', r'/');
                                           return InkWell(
                                             onTap: () {},
                                             child: Obx(() {
@@ -419,10 +435,7 @@ class _ProgressPageState extends State<ProgressPage> {
                                                 alignment: Alignment.center,
                                                 children: [
                                                   c.currentCompressingVide ==
-                                                          c.tobecompressedvideospath[
-                                                                  index]["path"]
-                                                              .replaceAll(
-                                                                  r'\', r'/')
+                                                          videoPath
                                                       ? LinearProgressIndicator(
                                                           backgroundColor:
                                                               Colors
@@ -442,21 +455,13 @@ class _ProgressPageState extends State<ProgressPage> {
                                                         const EdgeInsets.all(8),
                                                     decoration: BoxDecoration(
                                                       color: c.allcompressedvideospath
-                                                              .contains(c
-                                                                  .tobecompressedvideospath[index]
-                                                                      ["path"]
-                                                                  .replaceAll(
-                                                                      r'\', r'/'))
+                                                              .contains(
+                                                                  videoPath)
                                                           ? Colors.green[100]
                                                           : c.currentCompressingVide ==
-                                                                  c.tobecompressedvideospath[
-                                                                          index]
-                                                                          [
-                                                                          "path"]
-                                                                      .replaceAll(
-                                                                          r'\',
-                                                                          r'/')
-                                                              ? Colors.transparent
+                                                                  videoPath
+                                                              ? Colors
+                                                                  .transparent
                                                               : Colors.white,
                                                       borderRadius:
                                                           const BorderRadius
@@ -469,26 +474,6 @@ class _ProgressPageState extends State<ProgressPage> {
                                                             8.0),
                                                     child: Row(
                                                       children: [
-                                                        // Container(
-                                                        //   alignment: Alignment.center,
-                                                        //   width: 100,
-                                                        //   child: SizedBox(
-                                                        //     height: 30,
-                                                        //     width: 30,
-                                                        //     child: ClipRRect(
-                                                        //       borderRadius:
-                                                        //           BorderRadius
-                                                        //               .circular(30),
-                                                        //       child: Image.asset(
-                                                        //         // '${c.tobecompressedvideospath[index]["image"]}',
-
-                                                        //         'assets/profile-picture.jpeg',
-                                                        //         fit: BoxFit.cover,
-                                                        //       ),
-                                                        //     ),
-                                                        //   ),
-                                                        // ),
-                                                        // const SizedBox(width: 10),
                                                         SizedBox(
                                                           width: 100,
                                                           child: Text(
@@ -579,9 +564,7 @@ class _ProgressPageState extends State<ProgressPage> {
                                                                             .length ==
                                                                         index ||
                                                                     c.currentCompressingVide !=
-                                                                        c.tobecompressedvideospath[index]["path"].replaceAll(
-                                                                            r'\',
-                                                                            r'/')
+                                                                        videoPath
                                                                 ? Checkbox(
                                                                     checkColor:
                                                                         ColorPage
@@ -589,21 +572,16 @@ class _ProgressPageState extends State<ProgressPage> {
                                                                     fillColor:
                                                                         const MaterialStatePropertyAll(
                                                                             Colors.transparent),
-                                                                    value: isChecked(c
-                                                                        .tobecompressedvideospath[
-                                                                            index]
-                                                                            [
-                                                                            "path"]
-                                                                        .replaceAll(
-                                                                            r'\',
-                                                                            r'/')),
-                                                                    onChanged: c.allcompressedvideospath.contains(c.tobecompressedvideospath[index]["path"].replaceAll(
-                                                                            r'\',
-                                                                            r'/'))
+                                                                    value: isChecked(
+                                                                        videoPath),
+                                                                    onChanged: c
+                                                                            .allcompressedvideospath
+                                                                            .contains(
+                                                                                videoPath)
                                                                         ? null
                                                                         : (bool?
                                                                             value) {
-                                                                            setChecked(c.tobecompressedvideospath[index]["path"].replaceAll(r'\', r'/'),
+                                                                            setChecked(videoPath,
                                                                                 value!);
                                                                           },
                                                                   )
@@ -616,13 +594,7 @@ class _ProgressPageState extends State<ProgressPage> {
                                                           width: 100,
                                                           child: Center(
                                                               child: c.currentCompressingVide ==
-                                                                      c.tobecompressedvideospath[
-                                                                              index]
-                                                                              [
-                                                                              "path"]
-                                                                          .replaceAll(
-                                                                              r'\',
-                                                                              r'/')
+                                                                      videoPath
                                                                   ? null
                                                                   : Checkbox(
                                                                       checkColor:
@@ -631,22 +603,21 @@ class _ProgressPageState extends State<ProgressPage> {
                                                                       fillColor:
                                                                           const MaterialStatePropertyAll(
                                                                               Colors.transparent),
-                                                                      value: isChecked(c
-                                                                          .tobecompressedvideospath[
-                                                                              index]
-                                                                              [
-                                                                              "path"]
-                                                                          .replaceAll(
-                                                                              r'\',
-                                                                              r'/')),
-                                                                      onChanged: c.allcompressedvideospath.contains(c.tobecompressedvideospath[index]["path"].replaceAll(
-                                                                              r'\',
-                                                                              r'/'))
-                                                                          ? null
-                                                                          : (bool?
+                                                                      value: compressedState[
+                                                                              videoPath] ??
+                                                                          false,
+                                                                      onChanged:
+                                                                          (bool?
                                                                               value) {
-                                                                              setChecked(c.tobecompressedvideospath[index]["path"].replaceAll(r'\', r'/'), value!);
-                                                                            },
+                                                                        if (value !=
+                                                                            null) {
+                                                                          setState(
+                                                                              () {
+                                                                            compressedState[videoPath] =
+                                                                                value;
+                                                                          });
+                                                                        }
+                                                                      },
                                                                     )),
                                                         ),
                                                         const SizedBox(
@@ -654,24 +625,18 @@ class _ProgressPageState extends State<ProgressPage> {
                                                         SizedBox(
                                                           width: 40,
                                                           child: Center(
-                                                            child: c.currentCompressingVide !=
-                                                                    c.tobecompressedvideospath[
-                                                                            index]
-                                                                            [
-                                                                            "path"]
-                                                                        .replaceAll(
-                                                                            r'\',
-                                                                            r'/')
-                                                                ? IconButton(
-                                                                    onPressed:
-                                                                        () {},
-                                                                    color: Colors
-                                                                        .red,
-                                                                    icon: const Icon(
-                                                                        Icons
-                                                                            .delete_outlined),
-                                                                  )
-                                                                : null,
+                                                            child:
+                                                                c.currentCompressingVide !=
+                                                                        videoPath
+                                                                    ? IconButton(
+                                                                        onPressed:
+                                                                            () {},
+                                                                        color: Colors
+                                                                            .red,
+                                                                        icon: const Icon(
+                                                                            Icons.delete_outlined),
+                                                                      )
+                                                                    : null,
                                                           ),
                                                         ),
                                                       ],
@@ -689,7 +654,7 @@ class _ProgressPageState extends State<ProgressPage> {
                                                 semanticsLabel: 'Please Wait',
                                               )
                                             : const Text(
-                                                'No video Availble',
+                                                'No video available',
                                                 textScaler:
                                                     TextScaler.linear(2),
                                               ))),
@@ -738,11 +703,6 @@ class _ProgressPageState extends State<ProgressPage> {
                                             Icon(Icons.warning_rounded),
                                         label: Text('Failed'),
                                       ),
-                                      // NavigationRailDestination(
-                                      //   icon: Icon(Icons.star_border),
-                                      //   selectedIcon: Icon(Icons.star),
-                                      //   label: Text('Others'),
-                                      // ),
                                     ],
                                   ),
                                 ),
@@ -820,14 +780,13 @@ class _ProgressPageState extends State<ProgressPage> {
 
   void _showMyDialog(BuildContext context, String date,
       List<Map<String, dynamic>> videos, int selectedIndex) {
-    // Filter videos based on the selected index
     List<Map<String, dynamic>> filteredVideos = videos.where((video) {
       if (selectedIndex == 0) {
         return video['Status'] == 'true';
       } else if (selectedIndex == 1) {
         return video['Status'] == 'false';
       } else {
-        return false; // This condition should not happen as we won't call the dialog for selectedIndex == 2
+        return false;
       }
     }).toList();
 

@@ -140,12 +140,14 @@ class RunCommand extends GetxController {
         now.toString());
 
     // Store the video details
-    final videoDetails = {
+    final Map<String, dynamic> videoDetails = {
       'type': extension(fileVideo.path).replaceFirst('.', ''),
       'name': basename(fileVideo.path),
       'path': fileVideo.path,
       'sizeMB': fileSizeInMB.toStringAsFixed(1),
       'duration': listVideoDuration.toStringAsFixed(2),
+      'isEncrypted': 'false',
+      'isCompressed': c.compress.value
     };
     print(videoDetails);
     c.tobecompressedvideospath.add(videoDetails);
@@ -162,7 +164,8 @@ class RunCommand extends GetxController {
   }
 
   void startCompressing() async {
-    if (isCompressing || cancelRequested) return; // Prevent re-entrance if already compressing or cancellation is requested
+    if (isCompressing || cancelRequested)
+      return; // Prevent re-entrance if already compressing or cancellation is requested
 
     isCompressing = true;
 
