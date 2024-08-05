@@ -227,44 +227,54 @@ class _ProgressPageState extends State<ProgressPage> {
                                   width: 10,
                                 ),
                                 Obx(
-                                  () => MaterialButton(
-                                    shape: ContinuousRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                      side: const BorderSide(
-                                          color: Colors.black54, width: 2),
-                                    ),
-                                    onPressed: () {
-                                      c.isCanceled.value
-                                          ? p.restartCompressing()
-                                          : p.cancelCompression();
-                                      c.isCanceled.value = !c.isCanceled.value;
-                                    },
-                                    child: Center(
-                                        child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 5),
-                                      child: Row(
-                                        children: [
-                                          const Icon(
-                                            Icons.cancel_outlined,
-                                            size: 20,
-                                            color: Colors.black54,
-                                          ),
-                                          const SizedBox(
-                                            width: 2,
-                                          ),
-                                          Text(
-                                            !c.isCanceled.value
-                                                ? 'Cancel All'
-                                                : 'Restart',
-                                            style: FontFamily.font3.copyWith(
-                                                fontSize: 14,
-                                                color: Colors.black54,
-                                                fontWeight: FontWeight.w600),
-                                          ),
-                                        ],
+                                  () => Opacity(
+                                    opacity:
+                                        c.tobecompressedvideospath.isNotEmpty
+                                            ? 1
+                                            : 0.4,
+                                    child: MaterialButton(
+                                      shape: ContinuousRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        side: const BorderSide(
+                                            color: Colors.black54, width: 2),
                                       ),
-                                    )),
+                                      onPressed:
+                                          c.tobecompressedvideospath.isNotEmpty
+                                              ? () {
+                                                  c.isCanceled.value
+                                                      ? p.restartCompressing()
+                                                      : p.cancelCompression();
+                                                  c.isCanceled.value =
+                                                      !c.isCanceled.value;
+                                                }
+                                              : null,
+                                      child: Center(
+                                          child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10, vertical: 5),
+                                        child: Row(
+                                          children: [
+                                            const Icon(
+                                              Icons.cancel_outlined,
+                                              size: 20,
+                                              color: Colors.black54,
+                                            ),
+                                            const SizedBox(
+                                              width: 2,
+                                            ),
+                                            Text(
+                                              !c.isCanceled.value
+                                                  ? 'Cancel All'
+                                                  : 'Restart',
+                                              style: FontFamily.font3.copyWith(
+                                                  fontSize: 14,
+                                                  color: Colors.black54,
+                                                  fontWeight: FontWeight.w600),
+                                            ),
+                                          ],
+                                        ),
+                                      )),
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(
@@ -625,18 +635,37 @@ class _ProgressPageState extends State<ProgressPage> {
                                                         SizedBox(
                                                           width: 40,
                                                           child: Center(
-                                                            child:
-                                                                c.currentCompressingVide !=
-                                                                        videoPath
-                                                                    ? IconButton(
-                                                                        onPressed:
-                                                                            () {},
-                                                                        color: Colors
-                                                                            .red,
-                                                                        icon: const Icon(
-                                                                            Icons.delete_outlined),
-                                                                      )
-                                                                    : null,
+                                                            child: c.currentCompressingVide !=
+                                                                    c.tobecompressedvideospath[
+                                                                            index]
+                                                                            [
+                                                                            "path"]
+                                                                        .replaceAll(
+                                                                            r'\',
+                                                                            r'/')
+                                                                ? IconButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      print(c
+                                                                          .tobecompressedvideospath);
+                                                                      c.tobecompressedvideospath.remove(c
+                                                                          .tobecompressedvideospath[
+                                                                              index]
+                                                                              [
+                                                                              'path']
+                                                                          .replaceAll(
+                                                                              r'\',
+                                                                              r'/'));
+                                                                      print(
+                                                                          "Removed ${c.tobecompressedvideospath[index]['path']}");
+                                                                    },
+                                                                    color: Colors
+                                                                        .red,
+                                                                    icon: const Icon(
+                                                                        Icons
+                                                                            .delete_outlined),
+                                                                  )
+                                                                : null,
                                                           ),
                                                         ),
                                                       ],

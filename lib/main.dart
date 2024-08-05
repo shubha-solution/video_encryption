@@ -7,6 +7,7 @@ import 'package:overlay_support/overlay_support.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:video_encryption/components/colorpage.dart';
+import 'package:video_encryption/controllers/ffmpeg/video_compressor.dart';
 import 'package:video_encryption/controllers/filepath_controller.dart';
 import 'package:video_encryption/controllers/tray_controller.dart';
 import 'package:video_encryption/routes/routes.dart';
@@ -36,9 +37,14 @@ Future<void> main() async {
   runApp(const MyApp());
   doWhenWindowReady(() {
     final win = appWindow;
-    const initialSize = Size(900, 500);
-    win.minSize = initialSize;
-    win.size = initialSize;
+    // minimum window size
+    const minsize = Size(900, 500);
+
+    // initial window size
+    // const initialSize = Size(1920,1080);
+    win.minSize = minsize;
+
+    // win.size = initialSize;
     win.alignment = Alignment.center;
     win.title = "Windows Encryptor 1.0.0";
     win.show();
@@ -80,7 +86,7 @@ class _MyAppState extends State<MyApp> {
         },
         getPages: RoutesClass.routes,
         initialRoute: RoutesClass.login,
-      // home: VideoListScreen(),
+        // home: VideoListScreen(),
 
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
@@ -98,6 +104,8 @@ class MyTrayListener extends TrayListener {
     TrayManager.instance.popUpContextMenu();
   }
 
+  RunCommand c = RunCommand();
+
   @override
   void onTrayMenuItemClick(MenuItem menuItem) {
     switch (menuItem.key) {
@@ -108,13 +116,20 @@ class MyTrayListener extends TrayListener {
         windowManager.show();
         break;
       case 'progress':
-        Get.toNamed(RoutesClass.getprogress());
+        windowManager
+            .show()
+            .whenComplete(() => Get.toNamed(RoutesClass.getprogress()));
+
         break;
       case 'settings':
-        Get.toNamed(RoutesClass.getsettings());
+        windowManager
+            .show()
+            .whenComplete(() => Get.toNamed(RoutesClass.getsettings()));
+
         break;
       case 'exit':
         windowManager.close();
+        c.cancelCompression();
         break;
     }
   }
